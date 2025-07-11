@@ -63,7 +63,7 @@ user_page_id: dict[int, str] = {}
     A_COLLABORATIONS,
     A_SONGWRITER,
     A_PRODUCE,
-    # Videomaker states (NEW)
+    # Videomaker states
     V_NAME,
     V_COUNTRY,
     V_OCCUPATION,
@@ -73,7 +73,13 @@ user_page_id: dict[int, str] = {}
     V_PLANS,
     V_INSTRUMENTS_CONTEXT,
     V_ABOUT,
-) = range(43)
+    # Little Star states (NEW)
+    LS_NAME,
+    LS_COUNTRY,
+    LS_GENRE,
+    LS_INSTAGRAM,
+    LS_PLANS,
+) = range(48)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     manifesto = (
@@ -190,6 +196,14 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             "Type": "Videomaker",
         }
         context.user_data["state"] = V_NAME
+        await query.edit_message_text("What is your name?")
+    elif query.data == "role_star":
+        user_data[query.from_user.id] = {
+            "Telegram": f"@{query.from_user.username}" if query.from_user.username else "",
+            "TG_ID": str(query.from_user.id),
+            "Type": "Little Star",
+        }
+        context.user_data["state"] = LS_NAME
         await query.edit_message_text("What is your name?")
 
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -545,7 +559,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         del user_page_id[chat_id]
         context.user_data.clear()
 
-    # === VIDEOMAKER FLOW (NEW) ===
+    # === VIDEOMAKER FLOW ===
     elif state == V_NAME:
         user_data[chat_id]["Name"] = text
         created = notion.pages.create(
@@ -620,6 +634,55 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         notion.pages.update(
             page_id=user_page_id[chat_id],
             properties={"About": {"rich_text": [{"text": {"content": text}}]}},
+        )
+        await update.message.reply_text("Thanks! Your answers have been saved. 🌟")
+        del user_data[chat_id]
+        del user_page_id[chat_id]
+        context.user_data.clear()
+
+    # === LITTLE STAR FLOW (NEW) ===
+    elif state == LS_NAME:
+        user_data[chat_id]["Name"] = text
+        created = notion.pages.create(
+            parent={"database_id": DATABASE_ID},
+            properties={
+                "Name": {"title": [{"text": {"content": text}}]},
+                "Telegram": {"rich_text": [{"text": {"content": user_data[chat_id]["Telegram"]}}]},
+                "Type": {"select": {"name": "Little Star"}},
+            },
+        )
+        user_page_id[chat_id] = created["id"]
+        context.user_data["state"] = LS_COUNTRY
+        await update.message.reply_text("Your location?")
+    elif state == LS_COUNTRY:
+        user_data[chat_id]["Country"] = text
+        notion.pages.update(
+            page_id=user_page_id[chat_id],
+            properties={"Country": {"rich_text": [{"text": {"content": text}}]}},
+        )
+        context.user_data["state"] = LS_GENRE
+        await update.message.reply_text("What are your specific skills?")
+    elif state == LS_GENRE:
+        user_data[chat_id]["Genre"] = text
+        notion.pages.update(
+            page_id=user_page_id[chat_id],
+            properties={"Genre": {"rich_text": [{"text": {"content": text}}]}},
+        )
+        context.user_data["state"] = LS_INSTAGRAM
+        await update.message.reply_text("Social networks")
+    elif state == LS_INSTAGRAM:
+        user_data[chat_id]["Instagram"] = text
+        notion.pages.update(
+            page_id=user_page_id[chat_id],
+            properties={"Instagram": {"rich_text": [{"text": {"content": text}}]}},
+        )
+        context.user_data["state"] = LS_PLANS
+        await update.message.reply_text("Tell a bit about your dream in our project: your ideas for collaba community")
+    elif state == LS_PLANS:
+        user_data[chat_id]["Plans"] = text
+        notion.pages.update(
+            page_id=user_page_id[chat_id],
+            properties={"Plans": {"rich_text": [{"text": {"content": text}}]}},
         )
         await update.message.reply_text("Thanks! Your answers have been saved. 🌟")
         del user_data[chat_id]
