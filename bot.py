@@ -28,20 +28,15 @@ user_page_id: dict[int, str] = {}
 
 (
     NAME,
-    INSTAGRAM,
     COUNTRY,
     OCCUPATION,
-    INSTRUMENTS,
-    INSTRUMENTS_CONTEXT,
-    SING,
-    MIXING,
     GENRE,
     DEMOS,
-    LIVE,
-    COLLABORATIONS,
-    EXPERIENCE,
+    ABOUT,
+    INSTAGRAM,
+    INSTRUMENTS_CONTEXT,
     PLANS,
-) = range(14)
+) = range(9)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     manifesto = (
@@ -122,20 +117,19 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             [InlineKeyboardButton("Musician", callback_data="role_musician")],
             [InlineKeyboardButton("Designer", callback_data="role_designer")],
             [InlineKeyboardButton("Videomaker", callback_data="role_videomaker")],
-            [InlineKeyboardButton("All Together", callback_data="role_all")],
             [InlineKeyboardButton("Mom Calls Me My Little Star", callback_data="role_star")],
         ]
         await query.edit_message_text("Who are you?", reply_markup=InlineKeyboardMarkup(keyboard))
     elif query.data == "end_bot":
         await query.edit_message_text("👋 Bye.")
-    elif query.data == "role_musician":
+    elif query.data == "role_designer":
         user_data[query.from_user.id] = {
             "Telegram": f"@{query.from_user.username}" if query.from_user.username else "",
             "TG_ID": str(query.from_user.id),
-            "Type": "Musician",
+            "Type": "Designer",
         }
         context.user_data["state"] = NAME
-        await query.edit_message_text("Name/artist name *")
+        await query.edit_message_text("What is your name?")
 
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chat_id = update.effective_user.id
@@ -153,16 +147,8 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             },
         )
         user_page_id[chat_id] = created["id"]
-        context.user_data["state"] = INSTAGRAM
-        await update.message.reply_text("Social networks")
-    elif state == INSTAGRAM:
-        user_data[chat_id]["Instagram"] = text
-        notion.pages.update(
-            page_id=user_page_id[chat_id],
-            properties={"Instagram": {"rich_text": [{"text": {"content": text}}]}},
-        )
         context.user_data["state"] = COUNTRY
-        await update.message.reply_text("Location")
+        await update.message.reply_text("Your location?")
     elif state == COUNTRY:
         user_data[chat_id]["Country"] = text
         notion.pages.update(
@@ -171,76 +157,26 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         )
         context.user_data["state"] = OCCUPATION
         keyboard = [
-            ["Singer"],
-            ["Sound Engineer"],
-            ["Composer"],
-            ["Arranger"],
-            ["Sound Designer"],
+            ["UI/UX Design"],
+            ["Web Design"],
+            ["Graphic Design"],
+            ["Illustration"],
+            ["3D Design"],
+            ["Fashion Design"],
         ]
         await update.message.reply_text(
-            "What is your occupation as a musician?",
+            "What is your specialization?\nSelect them all! (We mean, everything you can do)",
             reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True),
         )
     elif state == OCCUPATION:
         user_data[chat_id]["Occupation"] = text
         notion.pages.update(
             page_id=user_page_id[chat_id],
-            properties={"Occupation": {"select": {"name": text}}},
-        )
-        context.user_data["state"] = INSTRUMENTS
-        keyboard = [["Yep"], ["No"]]
-        await update.message.reply_text(
-            "Do you play any instruments?",
-            reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True),
-        )
-    elif state == INSTRUMENTS:
-        user_data[chat_id]["Instruments"] = text
-        notion.pages.update(
-            page_id=user_page_id[chat_id],
-            properties={"Instruments": {"select": {"name": text}}},
-        )
-        context.user_data["state"] = INSTRUMENTS_CONTEXT
-        await update.message.reply_text(
-            "What instruments do you play if you do?\nPut - if you are not",
-            reply_markup=ReplyKeyboardRemove(),
-        )
-    elif state == INSTRUMENTS_CONTEXT:
-        user_data[chat_id]["Instruments Context"] = text
-        notion.pages.update(
-            page_id=user_page_id[chat_id],
-            properties={"Instruments Context": {"rich_text": [{"text": {"content": text}}]}},
-        )
-        context.user_data["state"] = SING
-        keyboard = [["Yes"], ["No"]]
-        await update.message.reply_text(
-            "Do you sing?",
-            reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True),
-        )
-    elif state == SING:
-        user_data[chat_id]["Sing"] = text
-        notion.pages.update(
-            page_id=user_page_id[chat_id],
-            properties={"Sing": {"select": {"name": text}}},
-        )
-        context.user_data["state"] = MIXING
-        keyboard = [
-            ["Yes I Am A Professional"],
-            ["Yes I Am An Amateur"],
-            ["No"],
-        ]
-        await update.message.reply_text(
-            "What is your proficiency in mixing/mastering?",
-            reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True),
-        )
-    elif state == MIXING:
-        user_data[chat_id]["Mixing"] = text
-        notion.pages.update(
-            page_id=user_page_id[chat_id],
-            properties={"Mixing": {"select": {"name": text}}},
+            properties={"Occupation": {"rich_text": [{"text": {"content": text}}]}},
         )
         context.user_data["state"] = GENRE
         await update.message.reply_text(
-            "What genre do you identify with?\nIf multiple please write them all down",
+            "What are your specific skills?",
             reply_markup=ReplyKeyboardRemove(),
         )
     elif state == GENRE:
@@ -251,7 +187,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         )
         context.user_data["state"] = DEMOS
         await update.message.reply_text(
-            "Track/song/demo/beat\nPlease send Soundcloud link"
+            "Portfolio"
         )
     elif state == DEMOS:
         user_data[chat_id]["Demos"] = text
@@ -259,46 +195,39 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             page_id=user_page_id[chat_id],
             properties={"Demos": {"rich_text": [{"text": {"content": text}}]}},
         )
-        context.user_data["state"] = LIVE
+        context.user_data["state"] = ABOUT
         await update.message.reply_text(
-            "Vocal performance (for singers)\nPlease send Soundcloud/YouTube link if you are not a singer put -"
+            "Describe your design style"
         )
-    elif state == LIVE:
-        user_data[chat_id]["Live"] = text
+    elif state == ABOUT:
+        user_data[chat_id]["About"] = text
         notion.pages.update(
             page_id=user_page_id[chat_id],
-            properties={"Live": {"rich_text": [{"text": {"content": text}}]}},
+            properties={"About": {"rich_text": [{"text": {"content": text}}]}},
         )
-        context.user_data["state"] = COLLABORATIONS
-        keyboard = [
-            ["Face To Face"],
-            ["Online"],
-            ["I Am Not Sure"],
-        ]
+        context.user_data["state"] = INSTAGRAM
         await update.message.reply_text(
-            "How do you want to collaborate with other musicians?",
-            reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True),
+            "Social networks\nInstagram, for example"
         )
-    elif state == COLLABORATIONS:
-        user_data[chat_id]["Collaborations"] = text
+    elif state == INSTAGRAM:
+        user_data[chat_id]["Instagram"] = text
         notion.pages.update(
             page_id=user_page_id[chat_id],
-            properties={"Collaborations": {"select": {"name": text}}},
+            properties={"Instagram": {"rich_text": [{"text": {"content": text}}]}},
         )
-        context.user_data["state"] = EXPERIENCE
+        context.user_data["state"] = INSTRUMENTS_CONTEXT
         await update.message.reply_text(
-            "How many years have you been in music industry?",
-            reply_markup=ReplyKeyboardRemove(),
+            "What programs/softwares and tools do you use in your work?"
         )
-    elif state == EXPERIENCE:
-        user_data[chat_id]["Experience"] = text
+    elif state == INSTRUMENTS_CONTEXT:
+        user_data[chat_id]["Instruments Context"] = text
         notion.pages.update(
             page_id=user_page_id[chat_id],
-            properties={"Experience": {"rich_text": [{"text": {"content": text}}]}},
+            properties={"Instruments Context": {"rich_text": [{"text": {"content": text}}]}},
         )
         context.user_data["state"] = PLANS
         await update.message.reply_text(
-            "Plans\nTell us about your upcoming releases projects any personal or career plans you have for the near future\nThis is your space to outline your creative direction and aspirations"
+            "Tell a bit about your dream in our project\nYour ideas for collaba community"
         )
     elif state == PLANS:
         user_data[chat_id]["Plans"] = text
