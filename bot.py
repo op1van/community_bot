@@ -1,33 +1,64 @@
+"""
+telegram_bot.py
+Рабочий пример под python-telegram-bot v20+
+Сохрани как bot.py (или другое имя) и деплой на Render.
+
+❗️Чувствительные данные забираем из переменных окружения,
+а не хардкодим в файле.
+"""
+
+import os
 import logging
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
-from telegram.ext import (ApplicationBuilder, CommandHandler, CallbackQueryHandler,
-                          ContextTypes, MessageHandler, filters)
+from telegram import (
+    Update,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    ReplyKeyboardMarkup,
+)
+from telegram.ext import (
+    ApplicationBuilder,
+    CommandHandler,
+    CallbackQueryHandler,
+    ContextTypes,
+    MessageHandler,
+    filters,
+)
 from notion_client import Client as NotionClient
 
-# === Константы ===
-TELEGRAM_TOKEN = "7694013628:AAHHwezDN6958goCO59yEth4hjpyJkqNrfw"
-NOTION_TOKEN = "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"
-DATABASE_ID = "22bfed09bdbc80968f38f6b192be7c7f"
+# === Константы из окружения ===
+TELEGRAM_TOKEN = os.getenv("BOT_TOKEN")
+NOTION_TOKEN = os.getenv("NOTION_TOKEN")
+DATABASE_ID = os.getenv("NOTION_DATABASE_ID")
 
 # === Инициализация ===
 logging.basicConfig(level=logging.INFO)
 notion = NotionClient(auth=NOTION_TOKEN)
-user_data = {}
+user_data: dict[int, dict[str, str]] = {}
 
 # === Состояния ===
 (
-    NAME, COUNTRY, INSTAGRAM, SPOTIFY, ABOUT, PLANS, LIVE,
-    DEMOS, COLLABS, SONGWRITER, PRODUCE
+    NAME,
+    COUNTRY,
+    INSTAGRAM,
+    SPOTIFY,
+    ABOUT,
+    PLANS,
+    LIVE,
+    DEMOS,
+    COLLABS,
+    SONGWRITER,
+    PRODUCE,
 ) = range(11)
 
-# === Start ===
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+# === /start ===
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     text = "hey man there is collaba - the music community label that accidentally started itself"
     keyboard = [[InlineKeyboardButton("Nice", callback_data="step_1")]]
     await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
 
-# === Buttons ===
-async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+# === Inline-кнопки ===
+async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     await query.answer()
 
@@ -35,7 +66,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text = "there are a few questions ahead we would love you to answer  but please read the manifesto first"
         keyboard = [
             [InlineKeyboardButton("the important doc", callback_data="read_doc")],
-            [InlineKeyboardButton("no time to read", callback_data="skip_doc")]
+            [InlineKeyboardButton("no time to read", callback_data="skip_doc")],
         ]
         await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
 
@@ -43,7 +74,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text = "no option to go forward. sorry it is flkng important"
         keyboard = [
             [InlineKeyboardButton("ok", callback_data="end_bot")],
-            [InlineKeyboardButton("go back", callback_data="step_1")]
+            [InlineKeyboardButton("go back", callback_data="step_1")],
         ]
         await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
 
@@ -54,25 +85,42 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "_welcome to cllb._"
         )
         keyboard = [
-            [InlineKeyboardButton("i totally share your values, guys", callback_data="agree_manifesto")],
-            [InlineKeyboardButton("doesn't suits for me sorry guys", callback_data="reject_manifesto")]
+            [
+                InlineKeyboardButton(
+                    "i totally share your values, guys",
+                    callback_data="agree_manifesto",
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    "doesn't suits for me sorry guys",
+                    callback_data="reject_manifesto",
+                )
+            ],
         ]
-        await query.edit_message_text(manifesto, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
+        await query.edit_message_text(
+            manifesto,
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode="Markdown",
+        )
 
     elif query.data == "reject_manifesto":
         text = "by the way subscribe\n\nhttps://linktree.com/cllllllllllllb"
         keyboard = [
             [InlineKeyboardButton("ok", callback_data="end_bot")],
-            [InlineKeyboardButton("go back", callback_data="read_doc")]
+            [InlineKeyboardButton("go back", callback_data="read_doc")],
         ]
         await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif query.data == "agree_manifesto":
         text = "ok, thanks\nand now it is your turn.\nHave we met before??"
         keyboard = [
-            [InlineKeyboardButton(
-                "ready to introduce myself / 10 mins is recommended time for the questionnaire",
-                callback_data="start_survey")]
+            [
+                InlineKeyboardButton(
+                    "ready to introduce myself / 10 mins is recommended time for the questionnaire",
+                    callback_data="start_survey",
+                )
+            ]
         ]
         await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
 
@@ -83,7 +131,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("designer", callback_data="role_designer")],
             [InlineKeyboardButton("videomaker", callback_data="role_videomaker")],
             [InlineKeyboardButton("all together", callback_data="role_all")],
-            [InlineKeyboardButton("mom calls me my little star", callback_data="role_star")]
+            [InlineKeyboardButton("mom calls me my little star", callback_data="role_star")],
         ]
         await query.edit_message_text("who are you?", reply_markup=InlineKeyboardMarkup(keyboard))
 
@@ -93,15 +141,16 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == "role_artist":
         user_data[query.from_user.id] = {
             "Telegram": f"@{query.from_user.username}" if query.from_user.username else "",
-            "TG_ID": query.from_user.id
+            "TG_ID": str(query.from_user.id),
         }
         context.user_data["state"] = NAME
         await query.edit_message_text("Name/artist name *")
 
-# === Artist Text Flow ===
-async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+# === Обработка текстовых ответов ===
+async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chat_id = update.effective_user.id
-    text = update.message.text
+    text = update.message.text.strip()
     state = context.user_data.get("state")
 
     if state == NAME:
@@ -144,7 +193,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data["state"] = COLLABS
         await update.message.reply_text(
             "Are you open for collaborations? *",
-            reply_markup=ReplyKeyboardMarkup([['yes'], ['no']], one_time_keyboard=True, resize_keyboard=True)
+            reply_markup=ReplyKeyboardMarkup([["yes"], ["no"]], one_time_keyboard=True, resize_keyboard=True),
         )
 
     elif state == COLLABS:
@@ -152,9 +201,11 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data["state"] = SONGWRITER
         await update.message.reply_text(
             "Are you a songwriter? Or someone from your team is? *",
-            reply_markup=ReplyKeyboardMarkup([
-                ['yes i am'], ['my teammate is'], ['no']
-            ], one_time_keyboard=True, resize_keyboard=True)
+            reply_markup=ReplyKeyboardMarkup(
+                [["yes i am"], ["my teammate is"], ["no"]],
+                one_time_keyboard=True,
+                resize_keyboard=True,
+            ),
         )
 
     elif state == SONGWRITER:
@@ -162,11 +213,15 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data["state"] = PRODUCE
         await update.message.reply_text(
             "Do you produce music yourself? *",
-            reply_markup=ReplyKeyboardMarkup([
-                ['yes i am also a soundproducer'],
-                ['no it is someone from my team'],
-                ['no']
-            ], one_time_keyboard=True, resize_keyboard=True)
+            reply_markup=ReplyKeyboardMarkup(
+                [
+                    ["yes i am also a soundproducer"],
+                    ["no it is someone from my team"],
+                    ["no"],
+                ],
+                one_time_keyboard=True,
+                resize_keyboard=True,
+            ),
         )
 
     elif state == PRODUCE:
@@ -188,17 +243,30 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "Demos": {"rich_text": [{"text": {"content": data["Demos"]}}]},
                 "Collaborations": {"select": {"name": data["Collaborations"]}},
                 "Songwriter": {"select": {"name": data["Songwriter"]}},
-                "Produce": {"select": {"name": data["Produce"]}}
-            }
+                "Produce": {"select": {"name": data["Produce"]}},
+            },
         )
 
+        # очистка
         del user_data[chat_id]
         context.user_data.clear()
 
+
 # === Запуск ===
-if __name__ == '__main__':
+def main() -> None:
+    if not TELEGRAM_TOKEN:
+        raise RuntimeError("BOT_TOKEN env var is missing")
+    if not (NOTION_TOKEN and DATABASE_ID):
+        raise RuntimeError("Notion env vars are missing")
+
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
+
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(button_handler))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
+
     app.run_polling()
+
+
+if __name__ == "__main__":
+    main()
