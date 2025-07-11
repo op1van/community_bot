@@ -1,12 +1,3 @@
-"""
-telegram_bot.py
-Рабочий пример под python-telegram-bot v20+
-Сохрани как bot.py (или другое имя) и деплой на Render.
-
-❗️Чувствительные данные забираем из переменных окружения,
-а не хардкодим в файле.
-"""
-
 import os
 import logging
 from telegram import (
@@ -142,6 +133,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         user_data[query.from_user.id] = {
             "Telegram": f"@{query.from_user.username}" if query.from_user.username else "",
             "TG_ID": str(query.from_user.id),
+            "Type": "Artist",  # Изменено: сохраняем выбранную роль
         }
         context.user_data["state"] = NAME
         await query.edit_message_text("Name/artist name *")
@@ -244,6 +236,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
                 "Collaborations": {"select": {"name": data["Collaborations"]}},
                 "Songwriter": {"select": {"name": data["Songwriter"]}},
                 "Produce": {"select": {"name": data["Produce"]}},
+                "Type": {"select": {"name": data["Type"]}},  # Изменено: добавлен тип
             },
         )
 
