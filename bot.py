@@ -141,10 +141,6 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     text = update.message.text.strip()
     state = context.user_data.get("state")
 
-    def clean_text(text: str) -> str:
-        # Оставляем только латинские буквы и пробелы
-        return re.sub(r'[^a-zA-Z ]+', '', text)
-
     text_clean = clean_text(text)
 
     if state == NAME:
@@ -180,11 +176,12 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True),
         )
     elif state == OCCUPATION:
-        # Разбиваем ответ по запятым для multi-select
+        # Пользователь может ввести несколько вариантов через запятую
         options = [opt.strip() for opt in text.split(",") if opt.strip()]
-        multi_select_options = [{"name": clean_text(opt)} for opt in options]
+        # НЕ применяем очистку clean_text к названиям опций, чтобы совпадали с Notion
+        multi_select_options = [{"name": opt} for opt in options]
 
-        user_data[chat_id]["Occupation"] = text_clean
+        user_data[chat_id]["Occupation"] = ", ".join(options)
         try:
             notion.pages.update(
                 page_id=user_page_id[chat_id],
