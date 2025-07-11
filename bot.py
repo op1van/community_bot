@@ -428,7 +428,10 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             properties={"Genre": {"rich_text": [{"text": {"content": text}}]}},
         )
         context.user_data["state"] = M_DEMOS
-        elif state == M_DEMOS:
+        await update.message.reply_text(
+            "Track/song/demo/beat\nPlease send Soundcloud link"
+        )
+    elif state == M_DEMOS:
         user_data[chat_id]["Demos"] = text
         notion.pages.update(
             page_id=user_page_id[chat_id],
