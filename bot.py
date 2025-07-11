@@ -21,13 +21,13 @@ TELEGRAM_TOKEN = os.getenv("BOT_TOKEN")
 NOTION_TOKEN = os.getenv("NOTION_TOKEN")
 DATABASE_ID = os.getenv("NOTION_DATABASE_ID")
 
-# === Инициализация ===
 logging.basicConfig(level=logging.INFO)
 notion = NotionClient(auth=NOTION_TOKEN)
 user_data: dict[int, dict[str, str]] = {}
 
 # === Состояния ===
 (
+    # Artist states
     NAME,
     COUNTRY,
     INSTAGRAM,
@@ -39,7 +39,22 @@ user_data: dict[int, dict[str, str]] = {}
     COLLABS,
     SONGWRITER,
     PRODUCE,
-) = range(11)
+    # Musician states (сдвигаются после 11)
+    M_NAME,
+    M_INSTAGRAM,
+    M_COUNTRY,
+    M_OCCUPATION,
+    M_INSTRUMENTS,
+    M_INSTRUMENTS_CONTEXT,
+    M_SING,
+    M_MIXING,
+    M_GENRE,
+    M_DEMOS,
+    M_LIVE,
+    M_COLLABORATIONS,
+    M_EXPERIENCE,
+    M_PLANS,
+) = range(25)
 
 # === /start ===
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -158,7 +173,14 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         context.user_data["state"] = NAME
         await query.edit_message_text("Name/artist name *")
 
-    # (В будущем: здесь аналогично реализовать для других ролей)
+    elif query.data == "role_musician":
+        user_data[query.from_user.id] = {
+            "Telegram": f"@{query.from_user.username}" if query.from_user.username else "",
+            "TG_ID": str(query.from_user.id),
+            "Type": "Musician",
+        }
+        context.user_data["state"] = M_NAME
+        await query.edit_message_text("Name/artist name *")
 
 # === Обработка текстовых ответов ===
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -166,6 +188,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     text = update.message.text.strip()
     state = context.user_data.get("state")
 
+    # === ARTIST FLOW ===
     if state == NAME:
         user_data[chat_id]["Name"] = text
         context.user_data["state"] = COUNTRY
@@ -249,18 +272,189 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
                 "Telegram": {"rich_text": [{"text": {"content": data["Telegram"]}}]},
                 "Country": {"rich_text": [{"text": {"content": data["Country"]}}]},
                 "Instagram": {"rich_text": [{"text": {"content": data["Instagram"]}}]},
-                "Spotify": {"rich_text": [{"text": {"content": data["Spotify"]}}]},
-                "About": {"rich_text": [{"text": {"content": data["About"]}}]},
-                "Plans": {"rich_text": [{"text": {"content": data["Plans"]}}]},
-                "Live": {"rich_text": [{"text": {"content": data["Live"]}}]},
-                "Demos": {"rich_text": [{"text": {"content": data["Demos"]}}]},
-                "Collaborations": {"select": {"name": data["Collaborations"]}},
-                "Songwriter": {"select": {"name": data["Songwriter"]}},
-                "Produce": {"select": {"name": data["Produce"]}},
-                "Type": {"select": {"name": data["Type"]}},
+                "Spotify": {"rich_text": [{"text": {"content": data.get("Spotify", "")}}]},
+                "About": {"rich_text": [{"text": {"content": data.get("About", "")}}]},
+                "Plans": {"rich_text": [{"text": {"content": data.get("Plans", "")}}]},
+                "Live": {"rich_text": [{"text": {"content": data.get("Live", "")}}]},
+                "Demos": {"rich_text": [{"text": {"content": data.get("Demos", "")}}]},
+                "Collaborations": {"select": {"name": data.get("Collaborations", "")}},
+                "Songwriter": {"select": {"name": data.get("Songwriter", "")}},
+                "Produce": {"select": {"name": data.get("Produce", "")}},
+                "Type": {"select": {"name": data.get("Type", "")}},
             },
         )
 
+        # очистка
+        del user_data[chat_id]
+        context.user_data.clear()
+
+    # === MUSICIAN FLOW ===
+    elif state == M_NAME:
+        user_data[chat_id]["Name"] = text
+        # Сохраняем сразу Name, Telegram, Type
+        notion.pages.create(
+            parent={"database_id": DATABASE_ID},
+            properties={
+                "Name": {"title": [{"text": {"content": user_data[chat_id]["Name"]}}]},
+                "Telegram": {"rich_text": [{"text": {"content": user_data[chat_id]["Telegram"]}}]},
+                "Type": {"select": {"name": user_data[chat_id]["Type"]}},
+            },
+        )
+        context.user_data["state"] = M_INSTAGRAM
+        await update.message.reply_text("Instagram *\nLink, please")
+
+    elif state == M_INSTAGRAM:
+        user_data[chat_id]["Instagram"] = text
+        notion.pages.create(
+            parent={"database_id": DATABASE_ID},
+            properties={
+                "Name": {"title": [{"text": {"content": user_data[chat_id]["Name"]}}]},
+                "Instagram": {"rich_text": [{"text": {"content": user_data[chat_id]["Instagram"]}}]},
+            },
+        )
+        context.user_data["state"] = M_COUNTRY
+        await update.message.reply_text("Country *")
+
+    elif state == M_COUNTRY:
+        user_data[chat_id]["Country"] = text
+        notion.pages.create(
+            parent={"database_id": DATABASE_ID},
+            properties={
+                "Name": {"title": [{"text": {"content": user_data[chat_id]["Name"]}}]},
+                "Country": {"rich_text": [{"text": {"content": user_data[chat_id]["Country"]}}]},
+            },
+        )
+        context.user_data["state"] = M_OCCUPATION
+        keyboard = [
+            ["Singer"],
+            ["Sound Engineer"],
+            ["Composer"],
+            ["Arranger"],
+            ["Sound Designer"],
+        ]
+        await update.message.reply_text(
+            "What is your occupation as a musician?",
+            reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True),
+        )
+
+    elif state == M_OCCUPATION:
+        user_data[chat_id]["Occupation"] = text
+        context.user_data["state"] = M_INSTRUMENTS
+        keyboard = [["Yep"], ["No"]]
+        await update.message.reply_text(
+            "Do you play any instruments?",
+            reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True),
+        )
+
+    elif state == M_INSTRUMENTS:
+        user_data[chat_id]["Instruments"] = text
+        if text.lower() == "yep":
+            context.user_data["state"] = M_INSTRUMENTS_CONTEXT
+            await update.message.reply_text("What instruments do you play? Put -, if you are not")
+        else:
+            user_data[chat_id]["Instruments Context"] = "-"
+            context.user_data["state"] = M_SING
+            keyboard = [["Yep"], ["No"]]
+            await update.message.reply_text(
+                "Do you sing?",
+                reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True),
+            )
+
+    elif state == M_INSTRUMENTS_CONTEXT:
+        user_data[chat_id]["Instruments Context"] = text
+        context.user_data["state"] = M_SING
+        keyboard = [["Yep"], ["No"]]
+        await update.message.reply_text(
+            "Do you sing?",
+            reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True),
+        )
+
+    elif state == M_SING:
+        user_data[chat_id]["Sing"] = text
+        context.user_data["state"] = M_MIXING
+        keyboard = [
+            ["Yes, I Am A Professional"],
+            ["Yes, I Am An Amateur"],
+            ["No"],
+        ]
+        await update.message.reply_text(
+            "What is your proficiency in mixing/mastering?",
+            reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True),
+        )
+
+    elif state == M_MIXING:
+        user_data[chat_id]["Mixing"] = text
+        context.user_data["state"] = M_GENRE
+        await update.message.reply_text(
+            "What genre do you identify with?\nIf multiple please write them all down"
+        )
+
+    elif state == M_GENRE:
+        user_data[chat_id]["Genre"] = text
+        context.user_data["state"] = M_DEMOS
+        await update.message.reply_text(
+            "Track/song/demo/beat\nPlease send Soundcloud link"
+        )
+
+    elif state == M_DEMOS:
+        user_data[chat_id]["Demos"] = text
+        context.user_data["state"] = M_LIVE
+        await update.message.reply_text(
+            "Vocal performance (for singers)\nPlease send Soundcloud/YouTube link, if you are not a singer, put -"
+        )
+
+    elif state == M_LIVE:
+        user_data[chat_id]["Live"] = text
+        context.user_data["state"] = M_COLLABORATIONS
+        keyboard = [
+            ["Face To Face"],
+            ["Online"],
+            ["I Am Not Sure"],
+        ]
+        await update.message.reply_text(
+            "How do you want to collaborate with other musicians?",
+            reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True),
+        )
+
+    elif state == M_COLLABORATIONS:
+        user_data[chat_id]["Collaborations"] = text
+        context.user_data["state"] = M_EXPERIENCE
+        await update.message.reply_text(
+            "How many years have you been in music industry?"
+        )
+
+    elif state == M_EXPERIENCE:
+        user_data[chat_id]["Experience"] = text
+        context.user_data["state"] = M_PLANS
+        await update.message.reply_text(
+            "Plans\nTell us about your upcoming releases, projects, any personal or career plans you have for the near future\nThis is your space to outline your creative direction and aspirations"
+        )
+
+    elif state == M_PLANS:
+        user_data[chat_id]["Plans"] = text
+        await update.message.reply_text("Thanks! Your answers have been saved. 🌟")
+        data = user_data[chat_id]
+        notion.pages.create(
+            parent={"database_id": DATABASE_ID},
+            properties={
+                "Name": {"title": [{"text": {"content": data.get("Name", "")}}]},
+                "Telegram": {"rich_text": [{"text": {"content": data.get("Telegram", "")}}]},
+                "Type": {"select": {"name": data.get("Type", "")}},
+                "Instagram": {"rich_text": [{"text": {"content": data.get("Instagram", "")}}]},
+                "Country": {"rich_text": [{"text": {"content": data.get("Country", "")}}]},
+                "Occupation": {"select": {"name": data.get("Occupation", "")}},
+                "Instruments": {"select": {"name": data.get("Instruments", "")}},
+                "Instruments Context": {"rich_text": [{"text": {"content": data.get("Instruments Context", "")}}]},
+                "Sing": {"select": {"name": data.get("Sing", "")}},
+                "Mixing": {"select": {"name": data.get("Mixing", "")}},
+                "Genre": {"rich_text": [{"text": {"content": data.get("Genre", "")}}]},
+                "Demos": {"rich_text": [{"text": {"content": data.get("Demos", "")}}]},
+                "Live": {"rich_text": [{"text": {"content": data.get("Live", "")}}]},
+                "Collaborations": {"select": {"name": data.get("Collaborations", "")}},
+                "Experience": {"rich_text": [{"text": {"content": data.get("Experience", "")}}]},
+                "Plans": {"rich_text": [{"text": {"content": data.get("Plans", "")}}]},
+            },
+        )
         # очистка
         del user_data[chat_id]
         context.user_data.clear()
@@ -273,11 +467,9 @@ def main() -> None:
         raise RuntimeError("Notion env vars are missing")
 
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
-
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(button_handler))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
-
     app.run_polling()
 
 if __name__ == "__main__":
