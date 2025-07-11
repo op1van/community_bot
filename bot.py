@@ -356,7 +356,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     text = update.message.text.strip()
     state = context.user_data.get("state")
 
-     if any(c.isupper() for c in text):
+    if any(c.isupper() for c in text):
         await update.message.reply_text("please use only lowercase letters 🌚")
         return
 
