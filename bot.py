@@ -51,7 +51,7 @@ user_page_id: dict[int, str] = {}
     D_INSTAGRAM,
     D_INSTRUMENTS_CONTEXT,
     D_PLANS,
-    # Artist states (NEW)
+    # Artist states
     A_NAME,
     A_COUNTRY,
     A_INSTAGRAM,
@@ -63,7 +63,17 @@ user_page_id: dict[int, str] = {}
     A_COLLABORATIONS,
     A_SONGWRITER,
     A_PRODUCE,
-) = range(34)
+    # Videomaker states (NEW)
+    V_NAME,
+    V_COUNTRY,
+    V_OCCUPATION,
+    V_GENRE,
+    V_DEMOS,
+    V_INSTAGRAM,
+    V_PLANS,
+    V_INSTRUMENTS_CONTEXT,
+    V_ABOUT,
+) = range(43)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     manifesto = (
@@ -173,14 +183,21 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         }
         context.user_data["state"] = D_NAME
         await query.edit_message_text("What is your name?")
-    # Остальные роли можно добавить по аналогии
+    elif query.data == "role_videomaker":
+        user_data[query.from_user.id] = {
+            "Telegram": f"@{query.from_user.username}" if query.from_user.username else "",
+            "TG_ID": str(query.from_user.id),
+            "Type": "Videomaker",
+        }
+        context.user_data["state"] = V_NAME
+        await query.edit_message_text("What is your name?")
 
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chat_id = update.effective_user.id
     text = update.message.text.strip()
     state = context.user_data.get("state")
 
-    # === MUSICIAN FLOW === (изначальный твой вариант)
+    # === MUSICIAN FLOW ===
     if state == NAME:
         user_data[chat_id]["Name"] = text
         created = notion.pages.create(
@@ -350,7 +367,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         del user_page_id[chat_id]
         context.user_data.clear()
 
-    # === ARTIST FLOW (NEW) ===
+    # === ARTIST FLOW ===
     elif state == A_NAME:
         user_data[chat_id]["Name"] = text
         created = notion.pages.create(
@@ -445,8 +462,6 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             "Do you produce music yourself?",
             reply_markup=InlineKeyboardMarkup(keyboard),
         )
-    # Ответ на produce обрабатывается отдельно через callback
-    # Завершение в artist_produce_handler
 
     # === DESIGNER FLOW ===
     elif state == D_NAME:
@@ -524,6 +539,87 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         notion.pages.update(
             page_id=user_page_id[chat_id],
             properties={"Plans": {"rich_text": [{"text": {"content": text}}]}},
+        )
+        await update.message.reply_text("Thanks! Your answers have been saved. 🌟")
+        del user_data[chat_id]
+        del user_page_id[chat_id]
+        context.user_data.clear()
+
+    # === VIDEOMAKER FLOW (NEW) ===
+    elif state == V_NAME:
+        user_data[chat_id]["Name"] = text
+        created = notion.pages.create(
+            parent={"database_id": DATABASE_ID},
+            properties={
+                "Name": {"title": [{"text": {"content": text}}]},
+                "Telegram": {"rich_text": [{"text": {"content": user_data[chat_id]["Telegram"]}}]},
+                "Type": {"select": {"name": "Videomaker"}},
+            },
+        )
+        user_page_id[chat_id] = created["id"]
+        context.user_data["state"] = V_COUNTRY
+        await update.message.reply_text("Your location?")
+    elif state == V_COUNTRY:
+        user_data[chat_id]["Country"] = text
+        notion.pages.update(
+            page_id=user_page_id[chat_id],
+            properties={"Country": {"rich_text": [{"text": {"content": text}}]}},
+        )
+        context.user_data["state"] = V_OCCUPATION
+        await update.message.reply_text("What is your position?")
+    elif state == V_OCCUPATION:
+        user_data[chat_id]["Occupation"] = text
+        notion.pages.update(
+            page_id=user_page_id[chat_id],
+            properties={"Occupation": {"rich_text": [{"text": {"content": text}}]}},
+        )
+        context.user_data["state"] = V_GENRE
+        await update.message.reply_text("What are your specific skills?")
+    elif state == V_GENRE:
+        user_data[chat_id]["Genre"] = text
+        notion.pages.update(
+            page_id=user_page_id[chat_id],
+            properties={"Genre": {"rich_text": [{"text": {"content": text}}]}},
+        )
+        context.user_data["state"] = V_DEMOS
+        await update.message.reply_text("Portfolio")
+    elif state == V_DEMOS:
+        user_data[chat_id]["Demos"] = text
+        notion.pages.update(
+            page_id=user_page_id[chat_id],
+            properties={"Demos": {"rich_text": [{"text": {"content": text}}]}},
+        )
+        context.user_data["state"] = V_INSTAGRAM
+        await update.message.reply_text("Social networks")
+    elif state == V_INSTAGRAM:
+        user_data[chat_id]["Instagram"] = text
+        notion.pages.update(
+            page_id=user_page_id[chat_id],
+            properties={"Instagram": {"rich_text": [{"text": {"content": text}}]}},
+        )
+        context.user_data["state"] = V_PLANS
+        await update.message.reply_text("Tell a bit about your dream in our project: your ideas for collaba community")
+    elif state == V_PLANS:
+        user_data[chat_id]["Plans"] = text
+        notion.pages.update(
+            page_id=user_page_id[chat_id],
+            properties={"Plans": {"rich_text": [{"text": {"content": text}}]}},
+        )
+        context.user_data["state"] = V_INSTRUMENTS_CONTEXT
+        await update.message.reply_text("Do you have any equipment? If yes, what kind?")
+    elif state == V_INSTRUMENTS_CONTEXT:
+        user_data[chat_id]["Instruments Context"] = text
+        notion.pages.update(
+            page_id=user_page_id[chat_id],
+            properties={"Instruments Context": {"rich_text": [{"text": {"content": text}}]}},
+        )
+        context.user_data["state"] = V_ABOUT
+        await update.message.reply_text("What programs and tools do you use in your work?")
+    elif state == V_ABOUT:
+        user_data[chat_id]["About"] = text
+        notion.pages.update(
+            page_id=user_page_id[chat_id],
+            properties={"About": {"rich_text": [{"text": {"content": text}}]}},
         )
         await update.message.reply_text("Thanks! Your answers have been saved. 🌟")
         del user_data[chat_id]
