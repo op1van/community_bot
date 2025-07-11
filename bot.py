@@ -27,7 +27,6 @@ user_data: dict[int, dict[str, str]] = {}
 user_page_id: dict[int, str] = {}
 
 (
-    # Artist/Musician/Designer states
     NAME,
     INSTAGRAM,
     COUNTRY,
@@ -89,7 +88,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             ],
             [
                 InlineKeyboardButton(
-                    "Not My Vibe, Sorry Folks",
+                    "Not My Vibe Sorry Folks",
                     callback_data="reject_manifesto",
                 )
             ],
@@ -111,7 +110,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         keyboard = [
             [
                 InlineKeyboardButton(
-                    "Ok, Intro Me. 10 Min Tops",
+                    "Ok Intro Me 10 Min Tops",
                     callback_data="start_survey",
                 )
             ]
@@ -130,7 +129,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     elif query.data == "end_bot":
         await query.edit_message_text("👋 Bye.")
     elif query.data == "role_musician":
-        # Сохраняем Telegram и TG_ID сразу, Type — Musician
         user_data[query.from_user.id] = {
             "Telegram": f"@{query.from_user.username}" if query.from_user.username else "",
             "TG_ID": str(query.from_user.id),
@@ -138,14 +136,12 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         }
         context.user_data["state"] = NAME
         await query.edit_message_text("Name/artist name *")
-    # Аналогично для других ролей (Artist, Designer и т.д.)
 
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chat_id = update.effective_user.id
     text = update.message.text.strip()
     state = context.user_data.get("state")
 
-    # === MUSICIAN FLOW ===
     if state == NAME:
         user_data[chat_id]["Name"] = text
         created = notion.pages.create(
@@ -205,7 +201,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         )
         context.user_data["state"] = INSTRUMENTS_CONTEXT
         await update.message.reply_text(
-            "What instruments do you play, if you do?\nPut -, if you are not",
+            "What instruments do you play if you do?\nPut - if you are not",
             reply_markup=ReplyKeyboardRemove(),
         )
     elif state == INSTRUMENTS_CONTEXT:
@@ -228,8 +224,8 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         )
         context.user_data["state"] = MIXING
         keyboard = [
-            ["Yes, I Am A Professional"],
-            ["Yes, I Am An Amateur"],
+            ["Yes I Am A Professional"],
+            ["Yes I Am An Amateur"],
             ["No"],
         ]
         await update.message.reply_text(
@@ -265,7 +261,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         )
         context.user_data["state"] = LIVE
         await update.message.reply_text(
-            "Vocal performance (for singers)\nPlease send Soundcloud/YouTube link, if you are not a singer, put -"
+            "Vocal performance (for singers)\nPlease send Soundcloud/YouTube link if you are not a singer put -"
         )
     elif state == LIVE:
         user_data[chat_id]["Live"] = text
@@ -302,7 +298,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         )
         context.user_data["state"] = PLANS
         await update.message.reply_text(
-            "Plans\nTell us about your upcoming releases, projects, any personal or career plans you have for the near future\nThis is your space to outline your creative direction and aspirations"
+            "Plans\nTell us about your upcoming releases projects any personal or career plans you have for the near future\nThis is your space to outline your creative direction and aspirations"
         )
     elif state == PLANS:
         user_data[chat_id]["Plans"] = text
