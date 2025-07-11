@@ -1,4 +1,5 @@
 import os
+import re
 import logging
 from telegram import (
     Update,
@@ -37,6 +38,10 @@ user_page_id: dict[int, str] = {}
     INSTRUMENTS_CONTEXT,
     PLANS,
 ) = range(9)
+
+def clean_text(text: str) -> str:
+    # Оставляем только латинские буквы и пробелы
+    return re.sub(r'[^a-zA-Z ]+', '', text)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     manifesto = (
@@ -133,7 +138,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chat_id = update.effective_user.id
-    text = update.message.text.strip()
+    text = clean_text(update.message.text.strip())
     state = context.user_data.get("state")
 
     if state == NAME:
@@ -165,7 +170,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             ["Fashion Design"],
         ]
         await update.message.reply_text(
-            "What is your specialization?\nSelect them all! (We mean, everything you can do)",
+            "What is your specialization?\nSelect them all! (We mean everything you can do)",
             reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True),
         )
     elif state == OCCUPATION:
@@ -207,7 +212,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         )
         context.user_data["state"] = INSTAGRAM
         await update.message.reply_text(
-            "Social networks\nInstagram, for example"
+            "Social networks\nInstagram for example"
         )
     elif state == INSTAGRAM:
         user_data[chat_id]["Instagram"] = text
@@ -217,7 +222,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         )
         context.user_data["state"] = INSTRUMENTS_CONTEXT
         await update.message.reply_text(
-            "What programs/softwares and tools do you use in your work?"
+            "What programs softwares and tools do you use in your work"
         )
     elif state == INSTRUMENTS_CONTEXT:
         user_data[chat_id]["Instruments Context"] = text
@@ -235,7 +240,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             page_id=user_page_id[chat_id],
             properties={"Plans": {"rich_text": [{"text": {"content": text}}]}},
         )
-        await update.message.reply_text("Thanks! Your answers have been saved. 🌟")
+        await update.message.reply_text("Thanks Your answers have been saved 🌟")
         del user_data[chat_id]
         del user_page_id[chat_id]
         context.user_data.clear()
