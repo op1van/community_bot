@@ -40,7 +40,6 @@ user_page_id: dict[int, str] = {}
 ) = range(9)
 
 def clean_text(text: str) -> str:
-    # Оставляем только латинские буквы и пробелы
     return re.sub(r'[^a-zA-Z ]+', '', text)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -128,6 +127,9 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     elif query.data == "end_bot":
         await query.edit_message_text("👋 Bye.")
     elif query.data == "role_designer":
+        # Сохраняем роль в контексте для инициализации user_data
+        context.user_data["role_type"] = "Designer"
+        # Инициализируем user_data сразу с телеграмом и типом
         user_data[query.from_user.id] = {
             "Telegram": f"@{query.from_user.username}" if query.from_user.username else "",
             "TG_ID": str(query.from_user.id),
@@ -142,6 +144,14 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     state = context.user_data.get("state")
 
     text_clean = clean_text(text)
+
+    # Инициализация user_data если вдруг нет
+    if chat_id not in user_data:
+        user_data[chat_id] = {
+            "Telegram": f"@{update.effective_user.username}" if update.effective_user.username else "",
+            "TG_ID": str(chat_id),
+            "Type": context.user_data.get("role_type", "Designer"),
+        }
 
     if state == NAME:
         user_data[chat_id]["Name"] = text_clean
@@ -200,9 +210,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             properties={"Genre": {"rich_text": [{"text": {"content": text_clean}}]}},
         )
         context.user_data["state"] = DEMOS
-        await update.message.reply_text(
-            "Portfolio"
-        )
+        await update.message.reply_text("Portfolio")
     elif state == DEMOS:
         user_data[chat_id]["Demos"] = text_clean
         notion.pages.update(
@@ -210,9 +218,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             properties={"Demos": {"rich_text": [{"text": {"content": text_clean}}]}},
         )
         context.user_data["state"] = ABOUT
-        await update.message.reply_text(
-            "Describe your design style"
-        )
+        await update.message.reply_text("Describe your design style")
     elif state == ABOUT:
         user_data[chat_id]["About"] = text_clean
         notion.pages.update(
@@ -220,9 +226,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             properties={"About": {"rich_text": [{"text": {"content": text_clean}}]}},
         )
         context.user_data["state"] = INSTAGRAM
-        await update.message.reply_text(
-            "Social networks\nInstagram for example"
-        )
+        await update.message.reply_text("Social networks\nInstagram for example")
     elif state == INSTAGRAM:
         user_data[chat_id]["Instagram"] = text_clean
         notion.pages.update(
@@ -230,9 +234,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             properties={"Instagram": {"rich_text": [{"text": {"content": text_clean}}]}},
         )
         context.user_data["state"] = INSTRUMENTS_CONTEXT
-        await update.message.reply_text(
-            "What programs softwares and tools do you use in your work"
-        )
+        await update.message.reply_text("What programs softwares and tools do you use in your work")
     elif state == INSTRUMENTS_CONTEXT:
         user_data[chat_id]["Instruments Context"] = text_clean
         notion.pages.update(
@@ -240,9 +242,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             properties={"Instruments Context": {"rich_text": [{"text": {"content": text_clean}}]}},
         )
         context.user_data["state"] = PLANS
-        await update.message.reply_text(
-            "Tell a bit about your dream in our project\nYour ideas for collaba community"
-        )
+        await update.message.reply_text("Tell a bit about your dream in our project\nYour ideas for collaba community")
     elif state == PLANS:
         user_data[chat_id]["Plans"] = text_clean
         notion.pages.update(
