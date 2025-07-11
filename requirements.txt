@@ -1,2 +1,2 @@
-python-telegram-bot>=20.10,<21.0
+python-telegram-bot>=20.8,<21.0
 notion-client
