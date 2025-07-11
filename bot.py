@@ -138,11 +138,17 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chat_id = update.effective_user.id
-    text = clean_text(update.message.text.strip())
+    text = update.message.text.strip()
     state = context.user_data.get("state")
 
+    def clean_text(text: str) -> str:
+        # Оставляем только латинские буквы и пробелы
+        return re.sub(r'[^a-zA-Z ]+', '', text)
+
+    text_clean = clean_text(text)
+
     if state == NAME:
-        user_data[chat_id]["Name"] = text
+        user_data[chat_id]["Name"] = text_clean
         created = notion.pages.create(
             parent={"database_id": DATABASE_ID},
             properties={
@@ -155,10 +161,10 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         context.user_data["state"] = COUNTRY
         await update.message.reply_text("Your location?")
     elif state == COUNTRY:
-        user_data[chat_id]["Country"] = text
+        user_data[chat_id]["Country"] = text_clean
         notion.pages.update(
             page_id=user_page_id[chat_id],
-            properties={"Country": {"rich_text": [{"text": {"content": text}}]}},
+            properties={"Country": {"rich_text": [{"text": {"content": text_clean}}]}},
         )
         context.user_data["state"] = OCCUPATION
         keyboard = [
@@ -174,71 +180,80 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True),
         )
     elif state == OCCUPATION:
-        user_data[chat_id]["Occupation"] = text
-        notion.pages.update(
-            page_id=user_page_id[chat_id],
-            properties={"Occupation": {"rich_text": [{"text": {"content": text}}]}},
-        )
+        # Разбиваем ответ по запятым для multi-select
+        options = [opt.strip() for opt in text.split(",") if opt.strip()]
+        multi_select_options = [{"name": clean_text(opt)} for opt in options]
+
+        user_data[chat_id]["Occupation"] = text_clean
+        try:
+            notion.pages.update(
+                page_id=user_page_id[chat_id],
+                properties={"Occupation": {"multi_select": multi_select_options}},
+            )
+        except Exception as e:
+            logging.error(f"Notion update error on Occupation for user {chat_id}: {e}")
+            await update.message.reply_text("Oops something went wrong saving your Occupation. Please try again.")
+
         context.user_data["state"] = GENRE
         await update.message.reply_text(
             "What are your specific skills?",
             reply_markup=ReplyKeyboardRemove(),
         )
     elif state == GENRE:
-        user_data[chat_id]["Genre"] = text
+        user_data[chat_id]["Genre"] = text_clean
         notion.pages.update(
             page_id=user_page_id[chat_id],
-            properties={"Genre": {"rich_text": [{"text": {"content": text}}]}},
+            properties={"Genre": {"rich_text": [{"text": {"content": text_clean}}]}},
         )
         context.user_data["state"] = DEMOS
         await update.message.reply_text(
             "Portfolio"
         )
     elif state == DEMOS:
-        user_data[chat_id]["Demos"] = text
+        user_data[chat_id]["Demos"] = text_clean
         notion.pages.update(
             page_id=user_page_id[chat_id],
-            properties={"Demos": {"rich_text": [{"text": {"content": text}}]}},
+            properties={"Demos": {"rich_text": [{"text": {"content": text_clean}}]}},
         )
         context.user_data["state"] = ABOUT
         await update.message.reply_text(
             "Describe your design style"
         )
     elif state == ABOUT:
-        user_data[chat_id]["About"] = text
+        user_data[chat_id]["About"] = text_clean
         notion.pages.update(
             page_id=user_page_id[chat_id],
-            properties={"About": {"rich_text": [{"text": {"content": text}}]}},
+            properties={"About": {"rich_text": [{"text": {"content": text_clean}}]}},
         )
         context.user_data["state"] = INSTAGRAM
         await update.message.reply_text(
             "Social networks\nInstagram for example"
         )
     elif state == INSTAGRAM:
-        user_data[chat_id]["Instagram"] = text
+        user_data[chat_id]["Instagram"] = text_clean
         notion.pages.update(
             page_id=user_page_id[chat_id],
-            properties={"Instagram": {"rich_text": [{"text": {"content": text}}]}},
+            properties={"Instagram": {"rich_text": [{"text": {"content": text_clean}}]}},
         )
         context.user_data["state"] = INSTRUMENTS_CONTEXT
         await update.message.reply_text(
             "What programs softwares and tools do you use in your work"
         )
     elif state == INSTRUMENTS_CONTEXT:
-        user_data[chat_id]["Instruments Context"] = text
+        user_data[chat_id]["Instruments Context"] = text_clean
         notion.pages.update(
             page_id=user_page_id[chat_id],
-            properties={"Instruments Context": {"rich_text": [{"text": {"content": text}}]}},
+            properties={"Instruments Context": {"rich_text": [{"text": {"content": text_clean}}]}},
         )
         context.user_data["state"] = PLANS
         await update.message.reply_text(
             "Tell a bit about your dream in our project\nYour ideas for collaba community"
         )
     elif state == PLANS:
-        user_data[chat_id]["Plans"] = text
+        user_data[chat_id]["Plans"] = text_clean
         notion.pages.update(
             page_id=user_page_id[chat_id],
-            properties={"Plans": {"rich_text": [{"text": {"content": text}}]}},
+            properties={"Plans": {"rich_text": [{"text": {"content": text_clean}}]}},
         )
         await update.message.reply_text("Thanks Your answers have been saved 🌟")
         del user_data[chat_id]
