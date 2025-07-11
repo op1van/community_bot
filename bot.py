@@ -162,7 +162,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         )
         context.user_data["state"] = OCCUPATION
         keyboard = [
-            ["UI/UX Design"],
+            ["UI UX Design"],
             ["Web Design"],
             ["Graphic Design"],
             ["Illustration"],
