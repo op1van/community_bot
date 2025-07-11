@@ -164,7 +164,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         )
         context.user_data["state"] = OCCUPATION
         keyboard = [
-            ["UI UX Design"],
+            ["Interface Designer"],
             ["Web Design"],
             ["Graphic Design"],
             ["Illustration"],
@@ -172,20 +172,17 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             ["Fashion Design"],
         ]
         await update.message.reply_text(
-            "What is your specialization?\nSelect them all! (We mean everything you can do)",
+            "What is your specialization?",
             reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True),
         )
     elif state == OCCUPATION:
-        # Пользователь может ввести несколько вариантов через запятую
-        options = [opt.strip() for opt in text.split(",") if opt.strip()]
-        # НЕ применяем очистку clean_text к названиям опций, чтобы совпадали с Notion
-        multi_select_options = [{"name": opt} for opt in options]
+        selected_option = text.strip()
 
-        user_data[chat_id]["Occupation"] = ", ".join(options)
+        user_data[chat_id]["Occupation"] = selected_option
         try:
             notion.pages.update(
                 page_id=user_page_id[chat_id],
-                properties={"Occupation": {"multi_select": multi_select_options}},
+                properties={"Occupation": {"select": {"name": selected_option}}},
             )
         except Exception as e:
             logging.error(f"Notion update error on Occupation for user {chat_id}: {e}")
