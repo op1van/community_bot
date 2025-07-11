@@ -43,10 +43,11 @@ user_data: dict[int, dict[str, str]] = {}
 
 # === /start ===
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    text = "hey man there is collaba - the music community label that accidentally started itself"
+    text = (
+        "Hey there, meet cllb — the music community-label that kinda accidentally started itself (but stuck around on purpose)"
+    )
     keyboard = [[InlineKeyboardButton("Nice", callback_data="step_1")]]
     await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
-
 
 # === Inline-кнопки ===
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -54,37 +55,56 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     await query.answer()
 
     if query.data == "step_1":
-        text = "there are a few questions ahead we would love you to answer  but please read the manifesto first"
+        text = "Few questions coming up — but first, read the manifesto. It’s kinda sacred"
         keyboard = [
-            [InlineKeyboardButton("the important doc", callback_data="read_doc")],
-            [InlineKeyboardButton("no time to read", callback_data="skip_doc")],
+            [InlineKeyboardButton("The Important Doc", callback_data="read_doc")],
+            [InlineKeyboardButton("No Time To Read", callback_data="skip_doc")],
         ]
         await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif query.data == "skip_doc":
-        text = "no option to go forward. sorry it is flkng important"
+        text = "No skipping. It’s that fkng important"
         keyboard = [
-            [InlineKeyboardButton("ok", callback_data="end_bot")],
-            [InlineKeyboardButton("go back", callback_data="step_1")],
+            [InlineKeyboardButton("Ok", callback_data="end_bot")],
+            [InlineKeyboardButton("Go Back", callback_data="step_1")],
         ]
         await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif query.data == "read_doc":
         manifesto = (
-            "*the cllllllllllllb manifesto*\n\n"
-            "We’re not a “label”. We’re a crew...\n\n"
-            "_welcome to cllb._"
+            "the cllllllllllllb manifesto\n\n"
+            "We’re not a “label”. We’re a crew, a bunch of people who can’t stop making stuff and hyping each other up. "
+            "Music’s not something we drop — it’s something we accidentally turn into a whole thing at 2am. "
+            "Creativity here is more “send voice note while eating noodles” than “boardroom energy.”\n\n"
+            "We don’t care how many streams you got. We care if someone played it three times in a row ‘cause it hit. "
+            "We don’t chase formats. we chase goosebumps.\n\n"
+            "We don’t sign artists. we notice them. and then build a tiny universe around them.\n"
+            "cllb was born ‘cause we wanted a space where no one had to pretend to “fit in.”\n\n"
+            "Where weird is hot. and rough edges mean it’s alive. that weird voice memo you almost deleted? yeah, that’s the one. "
+            "We’re not scared of stuff that makes the algorithm uncomfortable.\n\n"
+            "We move like a pack of creatively chaotic raccoons. Somebody drops an idea in chat — boom. "
+            "Someone’s mixing, someone’s drawing, someone’s pitching a blog. "
+            "You could be a DJ, a coder, a poet, or just someone with oddly good vibes — it all matters.\n\n"
+            "This isn’t an industry. It’s a group project with no teacher.\n\n"
+            "We’re not promising fame or funding or fame and funding. We’re promising to stick around.\n"
+            "from “this is just a draft but…” to a gig in a country you’ve never been to.\n\n"
+            "There’s no contracts here. No KPIs. but sometimes you get a sticker and five people saying “omg” at once. "
+            "If you’re here, you’re already part of the magic. Right now. Not when you’re “ready.”\n\n"
+            "This isn’t business.\n"
+            "This is lowkey a cult (just kidding)\n"
+            "Not a product. A group hug in mp3.\n\n"
+            "welcome to cllb."
         )
         keyboard = [
             [
                 InlineKeyboardButton(
-                    "i totally share your values, guys",
+                    "100% Vibing With Your Values",
                     callback_data="agree_manifesto",
                 )
             ],
             [
                 InlineKeyboardButton(
-                    "doesn't suits for me sorry guys",
+                    "Not My Vibe, Sorry Folks",
                     callback_data="reject_manifesto",
                 )
             ],
@@ -92,23 +112,23 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await query.edit_message_text(
             manifesto,
             reply_markup=InlineKeyboardMarkup(keyboard),
-            parse_mode="Markdown",
+            parse_mode=None,
         )
 
     elif query.data == "reject_manifesto":
-        text = "by the way subscribe\n\nhttps://linktree.com/cllllllllllllb"
+        text = "Oh and hey — hit that subscribe button\n\nhttps://linktree.com/cllllllllllllb"
         keyboard = [
-            [InlineKeyboardButton("ok", callback_data="end_bot")],
-            [InlineKeyboardButton("go back", callback_data="read_doc")],
+            [InlineKeyboardButton("Ok", callback_data="end_bot")],
+            [InlineKeyboardButton("Go Back", callback_data="read_doc")],
         ]
         await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif query.data == "agree_manifesto":
-        text = "ok, thanks\nand now it is your turn.\nHave we met before??"
+        text = "Alrighty, your turn. Have we crossed paths before? 👀"
         keyboard = [
             [
                 InlineKeyboardButton(
-                    "ready to introduce myself / 10 mins is recommended time for the questionnaire",
+                    "Ok, Intro Me. 10 Min Tops",
                     callback_data="start_survey",
                 )
             ]
@@ -117,14 +137,14 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
     elif query.data == "start_survey":
         keyboard = [
-            [InlineKeyboardButton("artist", callback_data="role_artist")],
-            [InlineKeyboardButton("musician", callback_data="role_musician")],
-            [InlineKeyboardButton("designer", callback_data="role_designer")],
-            [InlineKeyboardButton("videomaker", callback_data="role_videomaker")],
-            [InlineKeyboardButton("all together", callback_data="role_all")],
-            [InlineKeyboardButton("mom calls me my little star", callback_data="role_star")],
+            [InlineKeyboardButton("Artist", callback_data="role_artist")],
+            [InlineKeyboardButton("Musician", callback_data="role_musician")],
+            [InlineKeyboardButton("Designer", callback_data="role_designer")],
+            [InlineKeyboardButton("Videomaker", callback_data="role_videomaker")],
+            [InlineKeyboardButton("All Together", callback_data="role_all")],
+            [InlineKeyboardButton("Mom Calls Me My Little Star", callback_data="role_star")],
         ]
-        await query.edit_message_text("who are you?", reply_markup=InlineKeyboardMarkup(keyboard))
+        await query.edit_message_text("Who are you?", reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif query.data == "end_bot":
         await query.edit_message_text("👋 Bye.")
@@ -133,11 +153,12 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         user_data[query.from_user.id] = {
             "Telegram": f"@{query.from_user.username}" if query.from_user.username else "",
             "TG_ID": str(query.from_user.id),
-            "Type": "Artist",  # Изменено: сохраняем выбранную роль
+            "Type": "Artist",
         }
         context.user_data["state"] = NAME
         await query.edit_message_text("Name/artist name *")
 
+    # (В будущем: здесь аналогично реализовать для других ролей)
 
 # === Обработка текстовых ответов ===
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -236,14 +257,13 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
                 "Collaborations": {"select": {"name": data["Collaborations"]}},
                 "Songwriter": {"select": {"name": data["Songwriter"]}},
                 "Produce": {"select": {"name": data["Produce"]}},
-                "Type": {"select": {"name": data["Type"]}},  # Изменено: добавлен тип
+                "Type": {"select": {"name": data["Type"]}},
             },
         )
 
         # очистка
         del user_data[chat_id]
         context.user_data.clear()
-
 
 # === Запуск ===
 def main() -> None:
@@ -259,7 +279,6 @@ def main() -> None:
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
 
     app.run_polling()
-
 
 if __name__ == "__main__":
     main()
