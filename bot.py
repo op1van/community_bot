@@ -41,7 +41,7 @@ user_page_id: dict[int, str] = {}
     COLLABORATIONS,
     EXPERIENCE,
     PLANS,
-    # Designer states (добавлено)
+    # Designer states
     D_NAME,
     D_COUNTRY,
     D_OCCUPATION,
@@ -51,7 +51,19 @@ user_page_id: dict[int, str] = {}
     D_INSTAGRAM,
     D_INSTRUMENTS_CONTEXT,
     D_PLANS,
-) = range(23)
+    # Artist states (NEW)
+    A_NAME,
+    A_COUNTRY,
+    A_INSTAGRAM,
+    A_SPOTIFY,
+    A_ABOUT,
+    A_PLANS,
+    A_LIVE,
+    A_DEMOS,
+    A_COLLABORATIONS,
+    A_SONGWRITER,
+    A_PRODUCE,
+) = range(34)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     manifesto = (
@@ -145,7 +157,14 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         }
         context.user_data["state"] = NAME
         await query.edit_message_text("Name/artist name *")
-    # --- Новый блок: Designer ---
+    elif query.data == "role_artist":
+        user_data[query.from_user.id] = {
+            "Telegram": f"@{query.from_user.username}" if query.from_user.username else "",
+            "TG_ID": str(query.from_user.id),
+            "Type": "Artist",
+        }
+        context.user_data["state"] = A_NAME
+        await query.edit_message_text("Name/artist name")
     elif query.data == "role_designer":
         user_data[query.from_user.id] = {
             "Telegram": f"@{query.from_user.username}" if query.from_user.username else "",
@@ -155,9 +174,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         context.user_data["state"] = D_NAME
         await query.edit_message_text("What is your name?")
     # Остальные роли можно добавить по аналогии
-
-    # Designer specialization выбор через inline-кнопки
-    # обработчик designer_specialization_handler — см. ниже
 
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chat_id = update.effective_user.id
@@ -334,6 +350,104 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         del user_page_id[chat_id]
         context.user_data.clear()
 
+    # === ARTIST FLOW (NEW) ===
+    elif state == A_NAME:
+        user_data[chat_id]["Name"] = text
+        created = notion.pages.create(
+            parent={"database_id": DATABASE_ID},
+            properties={
+                "Name": {"title": [{"text": {"content": text}}]},
+                "Telegram": {"rich_text": [{"text": {"content": user_data[chat_id]["Telegram"]}}]},
+                "Type": {"select": {"name": "Artist"}},
+            },
+        )
+        user_page_id[chat_id] = created["id"]
+        context.user_data["state"] = A_COUNTRY
+        await update.message.reply_text("Country")
+    elif state == A_COUNTRY:
+        user_data[chat_id]["Country"] = text
+        notion.pages.update(
+            page_id=user_page_id[chat_id],
+            properties={"Country": {"rich_text": [{"text": {"content": text}}]}},
+        )
+        context.user_data["state"] = A_INSTAGRAM
+        await update.message.reply_text("Instagram")
+    elif state == A_INSTAGRAM:
+        user_data[chat_id]["Instagram"] = text
+        notion.pages.update(
+            page_id=user_page_id[chat_id],
+            properties={"Instagram": {"rich_text": [{"text": {"content": text}}]}},
+        )
+        context.user_data["state"] = A_SPOTIFY
+        await update.message.reply_text("Spotify")
+    elif state == A_SPOTIFY:
+        user_data[chat_id]["Spotify"] = text
+        notion.pages.update(
+            page_id=user_page_id[chat_id],
+            properties={"Spotify": {"rich_text": [{"text": {"content": text}}]}},
+        )
+        context.user_data["state"] = A_ABOUT
+        await update.message.reply_text("About me\nIf you want to share any links, put them here")
+    elif state == A_ABOUT:
+        user_data[chat_id]["About"] = text
+        notion.pages.update(
+            page_id=user_page_id[chat_id],
+            properties={"About": {"rich_text": [{"text": {"content": text}}]}},
+        )
+        context.user_data["state"] = A_PLANS
+        await update.message.reply_text(
+            "Plans\nTell us about your upcoming releases, projects, any personal or career plans you have for the near future\nThis is your space to outline your creative direction and aspirations"
+        )
+    elif state == A_PLANS:
+        user_data[chat_id]["Plans"] = text
+        notion.pages.update(
+            page_id=user_page_id[chat_id],
+            properties={"Plans": {"rich_text": [{"text": {"content": text}}]}},
+        )
+        context.user_data["state"] = A_LIVE
+        await update.message.reply_text("Live videos")
+    elif state == A_LIVE:
+        user_data[chat_id]["Live"] = text
+        notion.pages.update(
+            page_id=user_page_id[chat_id],
+            properties={"Live": {"rich_text": [{"text": {"content": text}}]}},
+        )
+        context.user_data["state"] = A_DEMOS
+        await update.message.reply_text("Demos\nOnly soundcloud, please")
+    elif state == A_DEMOS:
+        user_data[chat_id]["Demos"] = text
+        notion.pages.update(
+            page_id=user_page_id[chat_id],
+            properties={"Demos": {"rich_text": [{"text": {"content": text}}]}},
+        )
+        context.user_data["state"] = A_COLLABORATIONS
+        keyboard = [
+            [InlineKeyboardButton("Yes", callback_data="artist_collab_yes")],
+            [InlineKeyboardButton("No", callback_data="artist_collab_no")],
+        ]
+        await update.message.reply_text(
+            "Are you open for collaborations?",
+            reply_markup=InlineKeyboardMarkup(keyboard),
+        )
+    elif state == A_SONGWRITER:
+        user_data[chat_id]["Songwriter"] = text
+        notion.pages.update(
+            page_id=user_page_id[chat_id],
+            properties={"Songwriter": {"select": {"name": text}}},
+        )
+        context.user_data["state"] = A_PRODUCE
+        keyboard = [
+            [InlineKeyboardButton("Yes I Am A Professional", callback_data="artist_prod_prof")],
+            [InlineKeyboardButton("Yes I Am An Amateur", callback_data="artist_prod_amateur")],
+            [InlineKeyboardButton("No", callback_data="artist_prod_no")],
+        ]
+        await update.message.reply_text(
+            "Do you produce music yourself?",
+            reply_markup=InlineKeyboardMarkup(keyboard),
+        )
+    # Ответ на produce обрабатывается отдельно через callback
+    # Завершение в artist_produce_handler
+
     # === DESIGNER FLOW ===
     elif state == D_NAME:
         user_data[chat_id]["Name"] = text
@@ -437,6 +551,82 @@ async def designer_specialization_handler(update: Update, context: ContextTypes.
     context.user_data["state"] = D_GENRE
     await query.edit_message_text("What are your specific skills?")
 
+async def artist_collab_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    chat_id = query.from_user.id
+    if query.data == "artist_collab_yes":
+        collab = "Yes"
+    elif query.data == "artist_collab_no":
+        collab = "No"
+    else:
+        await query.answer()
+        return
+    user_data[chat_id]["Collaborations"] = collab
+    notion.pages.update(
+        page_id=user_page_id[chat_id],
+        properties={"Collaborations": {"select": {"name": collab}}},
+    )
+    context.user_data["state"] = A_SONGWRITER
+    keyboard = [
+        [InlineKeyboardButton("Yes I Am", callback_data="artist_sw_yes")],
+        [InlineKeyboardButton("My Teammate Is", callback_data="artist_sw_teammate")],
+        [InlineKeyboardButton("No", callback_data="artist_sw_no")],
+    ]
+    await query.edit_message_text(
+        "Are you a songwriter? Or someone from your team is?",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+    )
+
+async def artist_songwriter_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    chat_id = query.from_user.id
+    sw_map = {
+        "artist_sw_yes": "Yes I Am",
+        "artist_sw_teammate": "My Teammate Is",
+        "artist_sw_no": "No"
+    }
+    sw = sw_map.get(query.data)
+    if not sw:
+        await query.answer()
+        return
+    user_data[chat_id]["Songwriter"] = sw
+    notion.pages.update(
+        page_id=user_page_id[chat_id],
+        properties={"Songwriter": {"select": {"name": sw}}},
+    )
+    context.user_data["state"] = A_PRODUCE
+    keyboard = [
+        [InlineKeyboardButton("Yes I Am A Professional", callback_data="artist_prod_prof")],
+        [InlineKeyboardButton("Yes I Am An Amateur", callback_data="artist_prod_amateur")],
+        [InlineKeyboardButton("No", callback_data="artist_prod_no")],
+    ]
+    await query.edit_message_text(
+        "Do you produce music yourself?",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+    )
+
+async def artist_produce_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    chat_id = query.from_user.id
+    prod_map = {
+        "artist_prod_prof": "Yes I Am A Professional",
+        "artist_prod_amateur": "Yes I Am An Amateur",
+        "artist_prod_no": "No"
+    }
+    prod = prod_map.get(query.data)
+    if not prod:
+        await query.answer()
+        return
+    user_data[chat_id]["Produce"] = prod
+    notion.pages.update(
+        page_id=user_page_id[chat_id],
+        properties={"Produce": {"select": {"name": prod}}},
+    )
+    await query.edit_message_text("Thanks! Your answers have been saved. 🌟")
+    del user_data[chat_id]
+    del user_page_id[chat_id]
+    context.user_data.clear()
+
 def main() -> None:
     if not TELEGRAM_TOKEN:
         raise RuntimeError("BOT_TOKEN env var is missing")
@@ -444,8 +634,11 @@ def main() -> None:
         raise RuntimeError("Notion env vars are missing")
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(CallbackQueryHandler(button_handler, pattern="^(?!designer_occ_).*"))
+    app.add_handler(CallbackQueryHandler(button_handler, pattern="^(?!designer_occ_|artist_collab_|artist_sw_|artist_prod_).*"))
     app.add_handler(CallbackQueryHandler(designer_specialization_handler, pattern="^designer_occ_"))
+    app.add_handler(CallbackQueryHandler(artist_collab_handler, pattern="^artist_collab_"))
+    app.add_handler(CallbackQueryHandler(artist_songwriter_handler, pattern="^artist_sw_"))
+    app.add_handler(CallbackQueryHandler(artist_produce_handler, pattern="^artist_prod_"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     app.run_polling()
 
