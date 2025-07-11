@@ -52,7 +52,7 @@ user_page_id: dict[int, str] = {}
     M_COLLABORATIONS,
     M_EXPERIENCE,
     M_PLANS,
-) = range(24)
+) = range(25)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     text = (
