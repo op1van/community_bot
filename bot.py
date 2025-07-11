@@ -42,7 +42,8 @@ user_page_id = {}
 ) = range(9)
 
 def clean_text(text: str) -> str:
-    return re.sub(r'[^a-zA-Z ]+', '', text)
+    # Оставляем только латинские буквы, цифры, пробелы, знаки препинания (по желанию можно убрать)
+    return re.sub(r'[^a-zA-Z0-9 .,!?@:/\-#]+', '', text)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     text = "Hey there, meet cllb — the music community-label that kinda accidentally started itself (but stuck around on purpose)"
@@ -101,7 +102,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await query.edit_message_text("👋 Bye.")
     elif query.data == "role_designer":
         context.user_data["role_type"] = "Designer"
-        # Создаём словарь сразу, но без остальных полей
         user_data[query.from_user.id] = {
             "Telegram": f"@{query.from_user.username}" if query.from_user.username else "",
             "TG_ID": str(query.from_user.id),
@@ -118,7 +118,6 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     text_clean = clean_text(text)
 
     if chat_id not in user_data:
-        # Вдруг пользователь начал писать без прохождения старта
         user_data[chat_id] = {
             "Telegram": f"@{update.effective_user.username}" if update.effective_user.username else "",
             "TG_ID": str(chat_id),
@@ -137,28 +136,20 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
                 },
             )
             user_page_id[chat_id] = created["id"]
-            logging.info(f"Created Notion page for user {chat_id} with ID {user_page_id[chat_id]}")
         except Exception as e:
-            logging.error(f"Failed to create Notion page for user {chat_id}: {e}")
-            await update.message.reply_text("Failed to save your data. Please try again.")
+            await update.message.reply_text("Failed to save your name. Please try again.")
             return
         context.user_data["state"] = COUNTRY
         await update.message.reply_text("Your location?")
     elif state == COUNTRY:
         user_data[chat_id]["Country"] = text_clean
-        if chat_id not in user_page_id:
-            logging.error(f"user_page_id missing for user {chat_id} at COUNTRY step")
-            await update.message.reply_text("Something went wrong. Please restart the bot.")
-            return
         try:
             notion.pages.update(
                 page_id=user_page_id[chat_id],
                 properties={"Country": {"rich_text": [{"text": {"content": text_clean}}]}},
             )
-            logging.info(f"Updated Country for user {chat_id}")
         except Exception as e:
-            logging.error(f"Failed to update Country for user {chat_id}: {e}")
-            await update.message.reply_text("Failed to save your data. Please try again.")
+            await update.message.reply_text("Failed to save your location. Please try again.")
             return
         context.user_data["state"] = OCCUPATION
         keyboard = [
@@ -176,140 +167,96 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     elif state == OCCUPATION:
         selected_option = text.strip()
         user_data[chat_id]["Occupation"] = selected_option
-        if chat_id not in user_page_id:
-            logging.error(f"user_page_id missing for user {chat_id} at OCCUPATION step")
-            await update.message.reply_text("Something went wrong. Please restart the bot.")
-            return
         try:
             notion.pages.update(
                 page_id=user_page_id[chat_id],
                 properties={"Occupation": {"select": {"name": selected_option}}},
             )
-            logging.info(f"Updated Occupation for user {chat_id}")
         except Exception as e:
-            logging.error(f"Failed to update Occupation for user {chat_id}: {e}")
-            await update.message.reply_text("Failed to save your data. Please try again.")
+            await update.message.reply_text("Failed to save your specialization. Please try again.")
             return
         context.user_data["state"] = GENRE
-        await update.message.reply_text(
-            "What are your specific skills?",
-            reply_markup=ReplyKeyboardRemove(),
-        )
+        await update.message.reply_text("What are your specific skills?", reply_markup=ReplyKeyboardRemove())
     elif state == GENRE:
         user_data[chat_id]["Genre"] = text_clean
-        if chat_id not in user_page_id:
-            logging.error(f"user_page_id missing for user {chat_id} at GENRE step")
-            await update.message.reply_text("Something went wrong. Please restart the bot.")
-            return
         try:
             notion.pages.update(
                 page_id=user_page_id[chat_id],
                 properties={"Genre": {"rich_text": [{"text": {"content": text_clean}}]}},
             )
-            logging.info(f"Updated Genre for user {chat_id}")
         except Exception as e:
-            logging.error(f"Failed to update Genre for user {chat_id}: {e}")
-            await update.message.reply_text("Failed to save your data. Please try again.")
+            await update.message.reply_text("Failed to save your skills. Please try again.")
             return
         context.user_data["state"] = DEMOS
         await update.message.reply_text("Portfolio")
     elif state == DEMOS:
         user_data[chat_id]["Demos"] = text_clean
-        if chat_id not in user_page_id:
-            logging.error(f"user_page_id missing for user {chat_id} at DEMOS step")
-            await update.message.reply_text("Something went wrong. Please restart the bot.")
-            return
         try:
             notion.pages.update(
                 page_id=user_page_id[chat_id],
                 properties={"Demos": {"rich_text": [{"text": {"content": text_clean}}]}},
             )
-            logging.info(f"Updated Demos for user {chat_id}")
         except Exception as e:
-            logging.error(f"Failed to update Demos for user {chat_id}: {e}")
-            await update.message.reply_text("Failed to save your data. Please try again.")
+            await update.message.reply_text("Failed to save your portfolio. Please try again.")
             return
         context.user_data["state"] = ABOUT
         await update.message.reply_text("Describe your design style")
     elif state == ABOUT:
         user_data[chat_id]["About"] = text_clean
-        if chat_id not in user_page_id:
-            logging.error(f"user_page_id missing for user {chat_id} at ABOUT step")
-            await update.message.reply_text("Something went wrong. Please restart the bot.")
-            return
         try:
             notion.pages.update(
                 page_id=user_page_id[chat_id],
                 properties={"About": {"rich_text": [{"text": {"content": text_clean}}]}},
             )
-            logging.info(f"Updated About for user {chat_id}")
         except Exception as e:
-            logging.error(f"Failed to update About for user {chat_id}: {e}")
-            await update.message.reply_text("Failed to save your data. Please try again.")
+            await update.message.reply_text("Failed to save your design style. Please try again.")
             return
         context.user_data["state"] = INSTAGRAM
         await update.message.reply_text("Social networks\nInstagram for example")
     elif state == INSTAGRAM:
         user_data[chat_id]["Instagram"] = text_clean
-        if chat_id not in user_page_id:
-            logging.error(f"user_page_id missing for user {chat_id} at INSTAGRAM step")
-            await update.message.reply_text("Something went wrong. Please restart the bot.")
-            return
         try:
             notion.pages.update(
                 page_id=user_page_id[chat_id],
                 properties={"Instagram": {"rich_text": [{"text": {"content": text_clean}}]}},
             )
-            logging.info(f"Updated Instagram for user {chat_id}")
         except Exception as e:
-            logging.error(f"Failed to update Instagram for user {chat_id}: {e}")
-            await update.message.reply_text("Failed to save your data. Please try again.")
+            await update.message.reply_text("Failed to save your social networks. Please try again.")
             return
         context.user_data["state"] = INSTRUMENTS_CONTEXT
         await update.message.reply_text("What programs softwares and tools do you use in your work")
     elif state == INSTRUMENTS_CONTEXT:
         user_data[chat_id]["Instruments Context"] = text_clean
-        if chat_id not in user_page_id:
-            logging.error(f"user_page_id missing for user {chat_id} at INSTRUMENTS_CONTEXT step")
-            await update.message.reply_text("Something went wrong. Please restart the bot.")
-            return
         try:
             notion.pages.update(
                 page_id=user_page_id[chat_id],
                 properties={"Instruments Context": {"rich_text": [{"text": {"content": text_clean}}]}},
             )
-            logging.info(f"Updated Instruments Context for user {chat_id}")
         except Exception as e:
-            logging.error(f"Failed to update Instruments Context for user {chat_id}: {e}")
-            await update.message.reply_text("Failed to save your data. Please try again.")
+            await update.message.reply_text("Failed to save your tools. Please try again.")
             return
         context.user_data["state"] = PLANS
         await update.message.reply_text("Tell a bit about your dream in our project\nYour ideas for collaba community")
     elif state == PLANS:
         user_data[chat_id]["Plans"] = text_clean
-        if chat_id not in user_page_id:
-            logging.error(f"user_page_id missing for user {chat_id} at PLANS step")
-            await update.message.reply_text("Something went wrong. Please restart the bot.")
-            return
         try:
             notion.pages.update(
                 page_id=user_page_id[chat_id],
                 properties={"Plans": {"rich_text": [{"text": {"content": text_clean}}]}},
             )
-            logging.info(f"Updated Plans for user {chat_id}")
         except Exception as e:
-            logging.error(f"Failed to update Plans for user {chat_id}: {e}")
-            await update.message.reply_text("Failed to save your data. Please try again.")
+            await update.message.reply_text("Failed to save your plans. Please try again.")
             return
-        await update.message.reply_text("Thanks Your answers have been saved 🌟")
-        del user_data[chat_id]
-        del user_page_id[chat_id]
+        await update.message.reply_text("Thanks! Your answers have been saved. 🌟")
+        # Очистка данных
+        user_data.pop(chat_id, None)
+        user_page_id.pop(chat_id, None)
         context.user_data.clear()
 
 def main() -> None:
     if not TELEGRAM_TOKEN:
         raise RuntimeError("BOT_TOKEN env var is missing")
-    if not (NOTION_TOKEN and DATABASE_ID):
+    if not NOTION_TOKEN or not DATABASE_ID:
         raise RuntimeError("Notion env vars are missing")
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
