@@ -73,7 +73,7 @@ user_page_id: dict[int, str] = {}
     V_PLANS,
     V_INSTRUMENTS_CONTEXT,
     V_ABOUT,
-    # Little Star states (NEW)
+    # Little Star states
     LS_NAME,
     LS_COUNTRY,
     LS_GENRE,
@@ -583,9 +583,10 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         await update.message.reply_text("What is your position?")
     elif state == V_OCCUPATION:
         user_data[chat_id]["Occupation"] = text
+        # Occupation is select!
         notion.pages.update(
             page_id=user_page_id[chat_id],
-            properties={"Occupation": {"rich_text": [{"text": {"content": text}}]}},
+            properties={"Occupation": {"select": {"name": text}}},
         )
         context.user_data["state"] = V_GENRE
         await update.message.reply_text("What are your specific skills?")
@@ -640,7 +641,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         del user_page_id[chat_id]
         context.user_data.clear()
 
-    # === LITTLE STAR FLOW (NEW) ===
+    # === LITTLE STAR FLOW ===
     elif state == LS_NAME:
         user_data[chat_id]["Name"] = text
         created = notion.pages.create(
