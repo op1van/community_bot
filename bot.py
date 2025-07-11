@@ -291,6 +291,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         del user_data[chat_id]
         del user_page_id[chat_id]
         context.user_data.clear()
+
     # MUSICIAN FLOW
     elif state == M_NAME:
         user_data[chat_id]["Name"] = text
@@ -384,6 +385,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
                 "Vocal performance (for singers)\nPlease send Soundcloud/YouTube link"
             )
         else:
+            # Если "No" — сразу переход к mixing
             context.user_data["state"] = M_MIXING
             keyboard = [
                 ["Yes, I Am A Professional"],
