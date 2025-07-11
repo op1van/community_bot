@@ -17,7 +17,7 @@ from telegram.ext import (
 )
 from notion_client import Client as NotionClient
 
-# ========== ENV ==========
+# ========== env ==========
 TELEGRAM_TOKEN = os.getenv("BOT_TOKEN")
 NOTION_TOKEN = os.getenv("NOTION_TOKEN")
 DATABASE_ID = os.getenv("NOTION_DATABASE_ID")
@@ -27,209 +27,208 @@ notion = NotionClient(auth=NOTION_TOKEN)
 user_data: dict[int, dict[str, str]] = {}
 user_page_id: dict[int, str] = {}
 
-# ========== STATES ==========
+# ========== states ==========
 (
-    NAME, INSTAGRAM, COUNTRY, OCCUPATION, INSTRUMENTS, INSTRUMENTS_CONTEXT, SING, MIXING, GENRE,
-    DEMOS, LIVE, COLLABORATIONS, EXPERIENCE, PLANS,
-    D_NAME, D_COUNTRY, D_OCCUPATION, D_GENRE, D_DEMOS, D_ABOUT, D_INSTAGRAM, D_INSTRUMENTS_CONTEXT, D_PLANS,
-    A_NAME, A_COUNTRY, A_INSTAGRAM, A_SPOTIFY, A_ABOUT, A_PLANS, A_LIVE, A_DEMOS, A_COLLABORATIONS, A_SONGWRITER, A_PRODUCE,
-    V_NAME, V_COUNTRY, V_OCCUPATION, V_GENRE, V_DEMOS, V_INSTAGRAM, V_PLANS, V_INSTRUMENTS_CONTEXT, V_ABOUT,
-    LS_NAME, LS_COUNTRY, LS_GENRE, LS_INSTAGRAM, LS_PLANS,
-    POST_1, POST_2, POST_3, FINAL_CHOICE, VIBE_CHECK
+    name, instagram, country, occupation, instruments, instruments_context, sing, mixing, genre,
+    demos, live, collaborations, experience, plans,
+    d_name, d_country, d_occupation, d_genre, d_demos, d_about, d_instagram, d_instruments_context, d_plans,
+    a_name, a_country, a_instagram, a_spotify, a_about, a_plans, a_live, a_demos, a_collaborations, a_songwriter, a_produce,
+    v_name, v_country, v_occupation, v_genre, v_demos, v_instagram, v_plans, v_instruments_context, v_about,
+    ls_name, ls_country, ls_genre, ls_instagram, ls_plans,
+    post_1, post_2, post_3, final_choice, vibe_check
 ) = range(53)
 
-# ========== TEXT BLOCKS ==========
+# ========== text blocks ==========
 
 MANIFESTO_TEXT = (
     "the cllllllllllllb manifesto\n\n"
-    "We’re not a “label”. We’re a crew, a bunch of people who can’t stop making stuff and hyping each other up. "
-    "Music’s not something we drop — it’s something we accidentally turn into a whole thing at 2am. Creativity here is more “send voice note while eating noodles” than “boardroom energy.”\n\n"
-    "We don’t care how many streams you got. We care if someone played it three times in a row ‘cause it hit. We don’t chase formats. we chase goosebumps.\n\n"
-    "We don’t sign artists. we notice them. and then build a tiny universe around them.\n"
+    "we’re not a “label”. we’re a crew, a bunch of people who can’t stop making stuff and hyping each other up. "
+    "music’s not something we drop — it’s something we accidentally turn into a whole thing at 2am. creativity here is more “send voice note while eating noodles” than “boardroom energy.”\n\n"
+    "we don’t care how many streams you got. we care if someone played it three times in a row ‘cause it hit. we don’t chase formats. we chase goosebumps.\n\n"
+    "we don’t sign artists. we notice them. and then build a tiny universe around them.\n"
     "cllb was born ‘cause we wanted a space where no one had to pretend to “fit in.”\n\n"
-    "Where weird is hot. and rough edges mean it’s alive. that weird voice memo you almost deleted? yeah, that’s the one. "
-    "We’re not scared of stuff that makes the algorithm uncomfortable.\n\n"
-    "We move like a pack of creatively chaotic raccoons. Somebody drops an idea in chat — boom. Someone’s mixing, someone’s drawing, someone’s pitching a blog. "
-    "You could be a DJ, a coder, a poet, or just someone with oddly good vibes — it all matters.\n\n"
-    "This isn’t an industry. It’s a group project with no teacher.\n\n"
-    "We’re not promising fame or funding or fame and funding. We’re promising to stick around. "
+    "where weird is hot. and rough edges mean it’s alive. that weird voice memo you almost deleted? yeah, that’s the one. "
+    "we’re not scared of stuff that makes the algorithm uncomfortable.\n\n"
+    "we move like a pack of creatively chaotic raccoons. somebody drops an idea in chat — boom. someone’s mixing, someone’s drawing, someone’s pitching a blog. "
+    "you could be a dj, a coder, a poet, or just someone with oddly good vibes — it all matters.\n\n"
+    "this isn’t an industry. it’s a group project with no teacher.\n\n"
+    "we’re not promising fame or funding or fame and funding. we’re promising to stick around. "
     "from “this is just a draft but…” to a gig in a country you’ve never been to.\n\n"
-    "There’s no contracts here. No KPIs. but sometimes you get a sticker and five people saying “omg” at once. If you’re here, you’re already part of the magic. Right now. Not when you’re “ready.”\n\n"
-    "This isn’t business.\n"
-    "This is lowkey a cult (just kidding)\n"
-    "Not a product. A group hug in mp3.\n\n"
+    "there’s no contracts here. no kpis. but sometimes you get a sticker and five people saying “omg” at once. if you’re here, you’re already part of the magic. right now. not when you’re “ready.”\n\n"
+    "this isn’t business.\n"
+    "this is lowkey a cult (just kidding)\n"
+    "not a product. a group hug in mp3.\n\n"
     "welcome to cllb."
 )
 
 POSTFLOW_1 = (
-    "What is cllllllllllllb?\n\n"
-    "We’re not a label-label.\n"
-    "We’re a music-flavored community with zero chill for perfection and a soft spot for weird sounds, late-night ideas, and collabs that make no sense on paper.\n"
-    "No contracts. No suits. No “what’s your monthly reach?”\n"
-    "Just real people, real stuff, real moments.\n\n"
-    "Our vibe / our mission\n\n"
-    "We’re building a cultural glitch in the matrix.\n"
-    "A home for songs that live in voice notes. Demos that never made it past “yo check this out.”\n"
-    "Sounds that hit you in the chest before they hit the charts (if ever).\n\n"
-    "From local Telegram chats to worldwide playlists.\n"
-    "From kitchen-table mixes to vinyl.\n"
-    "From \"idk if this is good\" to \"holy sh*t, this MOVES.\"\n\n"
-    "We’re a door. A bridge. A meme. A moment.\n"
-    "And yeah, a tiny bit of a movement.\n\n"
-    "Our Not-So-Corporate Values\n\n"
-    "Feeling over perfection\n"
-    "If it hits — it fits. Even if recorded on a toaster.\n\n"
-    "Co-creation over isolation\n"
-    "You don’t have to suffer in silence. Suffer with us — it’s more fun. One beat in the chat and boom — a team is born.\n\n"
-    "Community over industry\n"
-    "We don’t shape-shift for Spotify. We make stuff for people with souls.\n\n"
-    "Curation over contracts\n"
-    "You’re not a stat. A release isn’t a KPI. It’s a time capsule.\n\n"
-    "Self-joy over Pretending to be cooler than you are\n"
-    "Cringe is real. So is freedom. We pick freedom."
+    "what is cllllllllllllb?\n\n"
+    "we’re not a label-label.\n"
+    "we’re a music-flavored community with zero chill for perfection and a soft spot for weird sounds, late-night ideas, and collabs that make no sense on paper.\n"
+    "no contracts. no suits. no “what’s your monthly reach?”\n"
+    "just real people, real stuff, real moments.\n\n"
+    "our vibe / our mission\n\n"
+    "we’re building a cultural glitch in the matrix.\n"
+    "a home for songs that live in voice notes. demos that never made it past “yo check this out.”\n"
+    "sounds that hit you in the chest before they hit the charts (if ever).\n\n"
+    "from local telegram chats to worldwide playlists.\n"
+    "from kitchen-table mixes to vinyl.\n"
+    "from \"idk if this is good\" to \"holy sh*t, this moves.\"\n\n"
+    "we’re a door. a bridge. a meme. a moment.\n"
+    "and yeah, a tiny bit of a movement.\n\n"
+    "our not-so-corporate values\n\n"
+    "feeling over perfection\n"
+    "if it hits — it fits. even if recorded on a toaster.\n\n"
+    "co-creation over isolation\n"
+    "you don’t have to suffer in silence. suffer with us — it’s more fun. one beat in the chat and boom — a team is born.\n\n"
+    "community over industry\n"
+    "we don’t shape-shift for spotify. we make stuff for people with souls.\n\n"
+    "curation over contracts\n"
+    "you’re not a stat. a release isn’t a kpi. it’s a time capsule.\n\n"
+    "self-joy over pretending to be cooler than you are\n"
+    "cringe is real. so is freedom. we pick freedom."
 )
 
 POSTFLOW_2 = (
-    "What We Believe\n\n"
-    "We’re not chasing formats — we’re chasing goosebumps.\n"
-    "If it doesn’t hit somewhere between your ribs and your third eye? Skip.\n\n"
-    "We’re not here for viral hits (unless they’re accidentally iconic).\n"
-    "We’re here for meaning, memory, and the kind of sound that makes your brain go huh, okay wow.\n\n"
-    "This isn’t a startup pitch.\n"
-    "It’s a bridge — between DIY chaos and pro polish. Between Notes app bars and festival stages. Between “idk if this is anything” and “this changed my week.”\n\n"
-    "We don’t wait for green lights.\n"
-    "We start where we are — busted laptop, cracked plugins, 2AM self-doubt and all.\n"
-    "No permission needed.\n"
-    "Just press go.\n\n"
-    "How we actually operate\n\n"
-    "If a track goes off?\n"
-    "Boom — we spin up a team: mixheads, cover designers, write-y types, promo ninjas.\n"
-    "One post in the chat and suddenly it’s a mini label sprint.\n\n"
-    "There’s no form to apply.\n"
-    "No “why do you want this role” nonsense.\n"
-    "Just vibes and timing.\n"
-    "If it clicks — we’re on.\n\n"
-    "How the cllb crew’s got your back\n\n"
-    "Got an idea? Cool.\n"
-    "Drop it in chat and someone will hop on:\n"
+    "what we believe\n\n"
+    "we’re not chasing formats — we’re chasing goosebumps.\n"
+    "if it doesn’t hit somewhere between your ribs and your third eye? skip.\n\n"
+    "we’re not here for viral hits (unless they’re accidentally iconic).\n"
+    "we’re here for meaning, memory, and the kind of sound that makes your brain go huh, okay wow.\n\n"
+    "this isn’t a startup pitch.\n"
+    "it’s a bridge — between diy chaos and pro polish. between notes app bars and festival stages. between “idk if this is anything” and “this changed my week.”\n\n"
+    "we don’t wait for green lights.\n"
+    "we start where we are — busted laptop, cracked plugins, 2am self-doubt and all.\n"
+    "no permission needed.\n"
+    "just press go.\n\n"
+    "how we actually operate\n\n"
+    "if a track goes off?\n"
+    "boom — we spin up a team: mixheads, cover designers, write-y types, promo ninjas.\n"
+    "one post in the chat and suddenly it’s a mini label sprint.\n\n"
+    "there’s no form to apply.\n"
+    "no “why do you want this role” nonsense.\n"
+    "just vibes and timing.\n"
+    "if it clicks — we’re on.\n\n"
+    "how the cllb crew’s got your back\n\n"
+    "got an idea? cool.\n"
+    "drop it in chat and someone will hop on:\n"
     "mix your track\n"
     "sketch a cover\n"
     "write a lil blurb\n"
     "pitch it to press\n\n"
-    "We talk in TG, calls, group threads, memes, sometimes IRL.\n"
-    "You don’t have to be loud — just show up and care a little."
+    "we talk in tg, calls, group threads, memes, sometimes irl.\n"
+    "you don’t have to be loud — just show up and care a little."
 )
 
 POSTFLOW_3 = (
-    "What You Get With cllb\n\n"
-    "If you’re an artist:\n"
-    "• Real support (like actually)\n"
-    "• Feedback that’s not from your mom\n"
-    "• Help with mix, visuals, promo, and gigs\n"
-    "• Space to test, mess up, bounce back\n"
-    "• Digital & physical releases\n"
-    "• Your track on a playlist next to someone famous (maybe)\n\n"
-    "If you’re a creative/human person in the chat:\n"
-    "• Add real stuff to your portfolio (not just client decks)\n"
-    "• Be part of something weird + good\n"
-    "• Launch side quests, join collabs\n"
-    "• Use your skillset to do culture, not just content\n"
-    "• Build trust, not titles\n\n"
-    "If you’re breathing:\n"
-    "• Friends\n"
-    "• Chaos\n"
-    "• Creative fuel\n"
-    "• A stage we’re all building together\n\n"
-    "The Core Gremlins aka the cllb team\n\n"
-    "They scout, curate, troubleshoot, build, and occasionally cry in the group chat.\n"
-    "They keep it all moving, connecting dots and people like it’s a Mario Kart shortcut.\n\n"
-    "DM us:\n"
-    "Dasha – [@daria_kraski]\n"
-    "Mila – [@MilaIgnatevaa]\n"
-    "Eugene – [@boysdontexist]\n"
-    "Emil – [@colasigna]\n"
-    "Bogdan – [@dolgopolsque]\n"
-    "Ivan – [@🕳️]\n\n"
-    "Final Words\n\n"
-    "We’re not a label.\n"
-    "We’re not an agency.\n"
-    "We’re not chasing virality.\n"
-    "We’re just making things that mean something, with people who care.\n"
-    "You don’t need permission.\n"
-    "You don’t need to be perfect.\n"
-    "You just need to show up.\n"
-    "Welcome to cllllllllllllb."
+    "what you get with cllb\n\n"
+    "if you’re an artist:\n"
+    "• real support (like actually)\n"
+    "• feedback that’s not from your mom\n"
+    "• help with mix, visuals, promo, and gigs\n"
+    "• space to test, mess up, bounce back\n"
+    "• digital & physical releases\n"
+    "• your track on a playlist next to someone famous (maybe)\n\n"
+    "if you’re a creative/human person in the chat:\n"
+    "• add real stuff to your portfolio (not just client decks)\n"
+    "• be part of something weird + good\n"
+    "• launch side quests, join collabs\n"
+    "• use your skillset to do culture, not just content\n"
+    "• build trust, not titles\n\n"
+    "if you’re breathing:\n"
+    "• friends\n"
+    "• chaos\n"
+    "• creative fuel\n"
+    "• a stage we’re all building together\n\n"
+    "the core gremlins aka the cllb team\n\n"
+    "they scout, curate, troubleshoot, build, and occasionally cry in the group chat.\n"
+    "they keep it all moving, connecting dots and people like it’s a mario kart shortcut.\n\n"
+    "dm us:\n"
+    "dasha – [@daria_kraski]\n"
+    "mila – [@milaignatevaa]\n"
+    "eugene – [@boysdontexist]\n"
+    "emil – [@colasigna]\n"
+    "bogdan – [@dolgopolsque]\n"
+    "ivan – [@🕳️]\n\n"
+    "final words\n\n"
+    "we’re not a label.\n"
+    "we’re not an agency.\n"
+    "we’re not chasing virality.\n"
+    "we’re just making things that mean something, with people who care.\n"
+    "you don’t need permission.\n"
+    "you don’t need to be perfect.\n"
+    "you just need to show up.\n"
+    "welcome to cllllllllllllb."
 )
 
 FINAL_CHOICE_TEXT = (
-    "Wanna get noticed? Just show up and do your thing"
+    "wanna get noticed? just show up and do your thing"
 )
 VIBE_CHECK_TEXT = (
-    "Do we have collaba vibe check-in? Yes, we do!\n\n"
-    "1.     Be real. name things as it is, don’t shame them.\n"
-    "2.     Feedback? Yes. Rudeness? Nope.\n"
-    "3.     Burnt out? Say so. We’ll hold it down till you bounce back.\n"
-    "4.     Made a promise? Keep it. No pressure, but don’t ghost.\n"
-    "5.     Feeling lost or inactive for 2 weeks? You might quietly get dropped from the project. No hard feelings.\n"
-    "6.     Talkers ≠ doers. If you’re just chatting but not contributing — you’re chilling, not collabing.\n"
-    "7.     No bosses, no minions. But trust? Big yes.\n"
-    "8.     No pedestals. We’re all figuring it out — even the OGs.\n"
-    "9.     Leaving? All good. Just clean your room before you go.\n"
-    "10.  Invite cool people. Protect the vibe.\n"
-    "11.  Don’t lurk forever. Speak up. Help out.\n"
-    "12.  Fail? Cool. Try again. This is a playground.\n"
-    "13.  Start fires (creative ones). Light someone up.\n"
-    "14.  No to war, hate, or cultural theft. We don’t work with people who oppress or dehumanise — in any form.\n"
-    "15.  Respect the inner circle. Ask before sharing private convos.\n\n"
-    "Bonus track:\n"
-    "If you act on behalf of cllb — remember, you’re repping all of us. So filter the toxicity, and please… no -isms (sexism, racism, ableism, etc). Not our jam."
+    "do we have collaba vibe check-in? yes, we do!\n\n"
+    "1.     be real. name things as it is, don’t shame them.\n"
+    "2.     feedback? yes. rudeness? nope.\n"
+    "3.     burnt out? say so. we’ll hold it down till you bounce back.\n"
+    "4.     made a promise? keep it. no pressure, but don’t ghost.\n"
+    "5.     feeling lost or inactive for 2 weeks? you might quietly get dropped from the project. no hard feelings.\n"
+    "6.     talkers ≠ doers. if you’re just chatting but not contributing — you’re chilling, not collabing.\n"
+    "7.     no bosses, no minions. but trust? big yes.\n"
+    "8.     no pedestals. we’re all figuring it out — even the ogs.\n"
+    "9.     leaving? all good. just clean your room before you go.\n"
+    "10.  invite cool people. protect the vibe.\n"
+    "11.  don’t lurk forever. speak up. help out.\n"
+    "12.  fail? cool. try again. this is a playground.\n"
+    "13.  start fires (creative ones). light someone up.\n"
+    "14.  no to war, hate, or cultural theft. we don’t work with people who oppress or dehumanise — in any form.\n"
+    "15.  respect the inner circle. ask before sharing private convos.\n\n"
+    "bonus track:\n"
+    "if you act on behalf of cllb — remember, you’re repping all of us. so filter the toxicity, and please… no -isms (sexism, racism, ableism, etc). not our jam."
 )
 READY_FOR_FUN_TEXT = (
-    "Looks like you're ready for some fun, huh?"
+    "looks like you're ready for some fun, huh?"
 )
 JUST_VIBING_TEXT = (
-    "Oh and hey — hit that subscribe button\n\nhttps://linktree.com/cllllllllllllb"
+    "oh and hey — hit that subscribe button\n\nhttps://linktree.com/cllllllllllllb"
 )
 
-# ========== START SCREEN ==========
+# ========== start screen ==========
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     text = (
-        "Hey there, meet cllb — the music community-label that kinda accidentally started itself (but stuck around on purpose)"
+        "hey there, meet cllb — the music community-label that kinda accidentally started itself (but stuck around on purpose)"
     )
-    keyboard = [[InlineKeyboardButton("Nice", callback_data="step_1")]]
-    await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
+    keyboard = [[InlineKeyboardButton("nice", callback_data="step_1")]]
+    await update.message.reply_text(text)
 
-# ========== BUTTON HANDLERS (MAIN FLOW) ==========
+# ========== button handlers (main flow) ==========
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     await query.answer()
 
-    # Manifesto steps
     if query.data == "step_1":
-        text = "Few questions coming up — but first, read the manifesto. It’s kinda sacred"
+        text = "few questions coming up — but first, read the manifesto. it’s kinda sacred"
         keyboard = [
-            [InlineKeyboardButton("The Important Doc", callback_data="read_doc")],
-            [InlineKeyboardButton("No Time To Read", callback_data="skip_doc")],
+            [InlineKeyboardButton("the important doc", callback_data="read_doc")],
+            [InlineKeyboardButton("no time to read", callback_data="skip_doc")],
         ]
         await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
     elif query.data == "skip_doc":
-        text = "No skipping. It’s that fkng important"
+        text = "no skipping. it’s that fkng important"
         keyboard = [
-            [InlineKeyboardButton("Ok", callback_data="end_bot")],
-            [InlineKeyboardButton("Go Back", callback_data="step_1")],
+            [InlineKeyboardButton("ok", callback_data="end_bot")],
+            [InlineKeyboardButton("go back", callback_data="step_1")],
         ]
         await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
     elif query.data == "read_doc":
         keyboard = [
             [
                 InlineKeyboardButton(
-                    "100% Vibing With Your Values",
+                    "100% vibing with your values",
                     callback_data="agree_manifesto",
                 )
             ],
             [
                 InlineKeyboardButton(
-                    "Not My Vibe Sorry Folks",
+                    "not my vibe sorry folks",
                     callback_data="reject_manifesto",
                 )
             ],
@@ -242,16 +241,16 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     elif query.data == "reject_manifesto":
         text = JUST_VIBING_TEXT
         keyboard = [
-            [InlineKeyboardButton("Ok", callback_data="end_bot")],
-            [InlineKeyboardButton("Go Back", callback_data="read_doc")],
+            [InlineKeyboardButton("ok", callback_data="end_bot")],
+            [InlineKeyboardButton("go back", callback_data="read_doc")],
         ]
         await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
     elif query.data == "agree_manifesto":
-        text = "Alrighty, your turn. Have we crossed paths before? 👀"
+        text = "alrighty, your turn. have we crossed paths before? 👀"
         keyboard = [
             [
                 InlineKeyboardButton(
-                    "Ok Intro Me 10 Min Tops",
+                    "ok intro me 10 min tops",
                     callback_data="start_survey",
                 )
             ]
@@ -259,109 +258,184 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
     elif query.data == "start_survey":
         keyboard = [
-            [InlineKeyboardButton("Artist", callback_data="role_artist")],
-            [InlineKeyboardButton("Musician", callback_data="role_musician")],
-            [InlineKeyboardButton("Designer", callback_data="role_designer")],
-            [InlineKeyboardButton("Videomaker", callback_data="role_videomaker")],
-            [InlineKeyboardButton("Mom Calls Me My Little Star", callback_data="role_star")],
+            [InlineKeyboardButton("artist", callback_data="role_artist")],
+            [InlineKeyboardButton("musician", callback_data="role_musician")],
+            [InlineKeyboardButton("designer", callback_data="role_designer")],
+            [InlineKeyboardButton("videomaker", callback_data="role_videomaker")],
+            [InlineKeyboardButton("mom calls me my little star", callback_data="role_star")],
         ]
-        await query.edit_message_text("Who are you?", reply_markup=InlineKeyboardMarkup(keyboard))
+        await query.edit_message_text("who are you?", reply_markup=InlineKeyboardMarkup(keyboard))
     elif query.data == "end_bot":
-        await query.edit_message_text("👋 Bye.")
-        # Очищаем состояние, если вдруг
+        await query.edit_message_text("👋 bye.")
         context.user_data.clear()
         user_data.pop(query.from_user.id, None)
         user_page_id.pop(query.from_user.id, None)
-    # ==== Ветка выбора роли ====
     elif query.data == "role_musician":
         user_data[query.from_user.id] = {
             "Telegram": f"@{query.from_user.username}" if query.from_user.username else "",
             "TG_ID": str(query.from_user.id),
-            "Type": "Musician",
+            "Type": "musician",
         }
-        context.user_data["state"] = NAME
-        await query.edit_message_text("Name/artist name *")
+        context.user_data["state"] = name
+        await query.edit_message_text("name/artist name *")
     elif query.data == "role_artist":
         user_data[query.from_user.id] = {
             "Telegram": f"@{query.from_user.username}" if query.from_user.username else "",
             "TG_ID": str(query.from_user.id),
-            "Type": "Artist",
+            "Type": "artist",
         }
-        context.user_data["state"] = A_NAME
-        await query.edit_message_text("Name/artist name")
+        context.user_data["state"] = a_name
+        await query.edit_message_text("name/artist name")
     elif query.data == "role_designer":
         user_data[query.from_user.id] = {
             "Telegram": f"@{query.from_user.username}" if query.from_user.username else "",
             "TG_ID": str(query.from_user.id),
-            "Type": "Designer",
+            "Type": "designer",
         }
-        context.user_data["state"] = D_NAME
-        await query.edit_message_text("What is your name?")
+        context.user_data["state"] = d_name
+        await query.edit_message_text("what is your name?")
     elif query.data == "role_videomaker":
         user_data[query.from_user.id] = {
             "Telegram": f"@{query.from_user.username}" if query.from_user.username else "",
             "TG_ID": str(query.from_user.id),
-            "Type": "Videomaker",
+            "Type": "videomaker",
         }
-        context.user_data["state"] = V_NAME
-        await query.edit_message_text("What is your name?")
+        context.user_data["state"] = v_name
+        await query.edit_message_text("what is your name?")
     elif query.data == "role_star":
         user_data[query.from_user.id] = {
             "Telegram": f"@{query.from_user.username}" if query.from_user.username else "",
             "TG_ID": str(query.from_user.id),
-            "Type": "Little Star",
+            "Type": "little star",
         }
-        context.user_data["state"] = LS_NAME
-        await query.edit_message_text("What is your name?")
-    # ========== POSTFLOW ==========
+        context.user_data["state"] = ls_name
+        await query.edit_message_text("what is your name?")
     elif query.data == "continue_post_1":
-        context.user_data["state"] = POST_2
-        await query.edit_message_text(POSTFLOW_2, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Continue", callback_data="continue_post_2")]]))
+        context.user_data["state"] = post_2
+        await query.edit_message_text(POSTFLOW_2, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("continue", callback_data="continue_post_2")]]))
     elif query.data == "continue_post_2":
-        context.user_data["state"] = POST_3
-        await query.edit_message_text(POSTFLOW_3, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Continue", callback_data="continue_post_3")]]))
+        context.user_data["state"] = post_3
+        await query.edit_message_text(POSTFLOW_3, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("continue", callback_data="continue_post_3")]]))
     elif query.data == "continue_post_3":
-        context.user_data["state"] = FINAL_CHOICE
+        context.user_data["state"] = final_choice
         keyboard = [
-            [InlineKeyboardButton("Ok Ok Ok I Promise", callback_data="ok_i_promise")],
-            [InlineKeyboardButton("Lowkey Just Vibing And Watching", callback_data="just_vibing")],
+            [InlineKeyboardButton("ok ok ok i promise", callback_data="ok_i_promise")],
+            [InlineKeyboardButton("lowkey just vibing and watching", callback_data="just_vibing")],
         ]
         await query.edit_message_text(FINAL_CHOICE_TEXT, reply_markup=InlineKeyboardMarkup(keyboard))
     elif query.data == "just_vibing":
         keyboard = [
-            [InlineKeyboardButton("OK", callback_data="end_bot")],
-            [InlineKeyboardButton("Go Back", callback_data="back_to_final_choice")],
+            [InlineKeyboardButton("ok", callback_data="end_bot")],
+            [InlineKeyboardButton("go back", callback_data="back_to_final_choice")],
         ]
         await query.edit_message_text(JUST_VIBING_TEXT, reply_markup=InlineKeyboardMarkup(keyboard))
     elif query.data == "back_to_final_choice":
-        context.user_data["state"] = FINAL_CHOICE
+        context.user_data["state"] = final_choice
         keyboard = [
-            [InlineKeyboardButton("Ok Ok Ok I Promise", callback_data="ok_i_promise")],
-            [InlineKeyboardButton("Lowkey Just Vibing And Watching", callback_data="just_vibing")],
+            [InlineKeyboardButton("ok ok ok i promise", callback_data="ok_i_promise")],
+            [InlineKeyboardButton("lowkey just vibing and watching", callback_data="just_vibing")],
         ]
         await query.edit_message_text(FINAL_CHOICE_TEXT, reply_markup=InlineKeyboardMarkup(keyboard))
     elif query.data == "ok_i_promise":
-        context.user_data["state"] = VIBE_CHECK
-        await query.edit_message_text(VIBE_CHECK_TEXT, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("cllb, I Think Love U Already", callback_data="love_u")]]))
+        context.user_data["state"] = vibe_check
+        await query.edit_message_text(VIBE_CHECK_TEXT, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("cllb, i think love u already", callback_data="love_u")]]))
     elif query.data == "love_u":
-        await query.edit_message_text(READY_FOR_FUN_TEXT, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Join Community", url="https://t.me/addlist/QfvdyHJcGfg2NGZi")]]))
-        # Очистка всех данных после последнего экрана:
+        await query.edit_message_text(READY_FOR_FUN_TEXT, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("join community", url="https://t.me/addlist/QfvdyHJcGfg2NGZi")]]))
         context.user_data.clear()
         user_data.pop(query.from_user.id, None)
         user_page_id.pop(query.from_user.id, None)
 
-# ========== TEXT HANDLER (ВСЕ ВОПРОСЫ ВСЕХ FLOW + POSTFLOW) ==========
+# ========== designer specialization handler ==========
+async def designer_specialization_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    chat_id = query.from_user.id
+    occ_map = {
+        "designer_occ_interface": "interface designer",
+        "designer_occ_graphic": "graphic designer",
+        "designer_occ_motion": "motion designer",
+        "designer_occ_fashion": "fashion designer",
+    }
+    occ = occ_map.get(query.data)
+    if not occ:
+        await query.answer()
+        return
+    user_data[chat_id]["Occupation"] = occ
+    notion.pages.update(page_id=user_page_id[chat_id], properties={"Occupation": {"select": {"name": occ}}})
+    context.user_data["state"] = d_genre
+    await query.edit_message_text("what are your specific skills?")
+
+# ========== artist collab/songwriter/produce handlers ==========
+async def artist_collab_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    chat_id = query.from_user.id
+    if query.data == "artist_collab_yes":
+        collab = "yes"
+    elif query.data == "artist_collab_no":
+        collab = "no"
+    else:
+        await query.answer()
+        return
+    user_data[chat_id]["Collaborations"] = collab
+    notion.pages.update(page_id=user_page_id[chat_id], properties={"Collaborations": {"select": {"name": collab}}})
+    context.user_data["state"] = a_songwriter
+    keyboard = [
+        [InlineKeyboardButton("yes i am", callback_data="artist_sw_yes")],
+        [InlineKeyboardButton("my teammate is", callback_data="artist_sw_teammate")],
+        [InlineKeyboardButton("no", callback_data="artist_sw_no")],
+    ]
+    await query.edit_message_text("are you a songwriter? or someone from your team is?", reply_markup=InlineKeyboardMarkup(keyboard))
+
+async def artist_songwriter_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    chat_id = query.from_user.id
+    sw_map = {
+        "artist_sw_yes": "yes i am",
+        "artist_sw_teammate": "my teammate is",
+        "artist_sw_no": "no"
+    }
+    sw = sw_map.get(query.data)
+    if not sw:
+        await query.answer()
+        return
+    user_data[chat_id]["Songwriter"] = sw
+    notion.pages.update(page_id=user_page_id[chat_id], properties={"Songwriter": {"select": {"name": sw}}})
+    context.user_data["state"] = a_produce
+    keyboard = [
+        [InlineKeyboardButton("yes i am a professional", callback_data="artist_prod_prof")],
+        [InlineKeyboardButton("yes i am an amateur", callback_data="artist_prod_amateur")],
+        [InlineKeyboardButton("no", callback_data="artist_prod_no")],
+    ]
+    await query.edit_message_text("do you produce music yourself?", reply_markup=InlineKeyboardMarkup(keyboard))
+
+async def artist_produce_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    chat_id = query.from_user.id
+    prod_map = {
+        "artist_prod_prof": "yes i am a professional",
+        "artist_prod_amateur": "yes i am an amateur",
+        "artist_prod_no": "no"
+    }
+    prod = prod_map.get(query.data)
+    if not prod:
+        await query.answer()
+        return
+    user_data[chat_id]["Produce"] = prod
+    notion.pages.update(page_id=user_page_id[chat_id], properties={"Produce": {"select": {"name": prod}}})
+    context.user_data["state"] = post_1
+    await query.edit_message_text(POSTFLOW_1, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("continue", callback_data="continue_post_1")]]))
+
+# ========== text handler ==========
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chat_id = update.effective_user.id
-    text = update.message.text.strip()
-    state = context.user_data.get("state")
-
+    text = update.message.text.strip().lower()
     if any(c.isupper() for c in text):
         await update.message.reply_text("please use only lowercase letters 🌚")
         return
 
-    # --- MUSICIAN FLOW ---
-    if state == NAME:
+    state = context.user_data.get("state")
+
+    # musician flow
+    if state == name:
         user_data[chat_id]["Name"] = text
         created = notion.pages.create(
             parent={"database_id": DATABASE_ID},
@@ -372,367 +446,285 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             },
         )
         user_page_id[chat_id] = created["id"]
-        context.user_data["state"] = INSTAGRAM
-        await update.message.reply_text("Social networks")
-    elif state == INSTAGRAM:
+        context.user_data["state"] = instagram
+        await update.message.reply_text("social networks")
+    elif state == instagram:
         user_data[chat_id]["Instagram"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Instagram": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = COUNTRY
-        await update.message.reply_text("Location")
-    elif state == COUNTRY:
+        context.user_data["state"] = country
+        await update.message.reply_text("location")
+    elif state == country:
         user_data[chat_id]["Country"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Country": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = OCCUPATION
-        keyboard = [["Singer"], ["Sound Engineer"], ["Composer"], ["Arranger"], ["Sound Designer"]]
-        await update.message.reply_text("What is your occupation as a musician?", reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True))
-    elif state == OCCUPATION:
+        context.user_data["state"] = occupation
+        keyboard = [["singer"], ["sound engineer"], ["composer"], ["arranger"], ["sound designer"]]
+        await update.message.reply_text("what is your occupation as a musician?", reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True))
+    elif state == occupation:
         user_data[chat_id]["Occupation"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Occupation": {"select": {"name": text}}})
-        context.user_data["state"] = INSTRUMENTS
-        keyboard = [["Yep"], ["No"]]
-        await update.message.reply_text("Do you play any instruments?", reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True))
-    elif state == INSTRUMENTS:
+        context.user_data["state"] = instruments
+        keyboard = [["yep"], ["no"]]
+        await update.message.reply_text("do you play any instruments?", reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True))
+    elif state == instruments:
         user_data[chat_id]["Instruments"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Instruments": {"select": {"name": text}}})
-        context.user_data["state"] = INSTRUMENTS_CONTEXT
-        await update.message.reply_text("What instruments do you play if you do?\nPut - if you are not", reply_markup=ReplyKeyboardRemove())
-    elif state == INSTRUMENTS_CONTEXT:
+        context.user_data["state"] = instruments_context
+        await update.message.reply_text("what instruments do you play if you do?\nput - if you are not", reply_markup=ReplyKeyboardRemove())
+    elif state == instruments_context:
         user_data[chat_id]["Instruments Context"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Instruments Context": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = SING
-        keyboard = [["Yes"], ["No"]]
-        await update.message.reply_text("Do you sing?", reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True))
-    elif state == SING:
+        context.user_data["state"] = sing
+        keyboard = [["yes"], ["no"]]
+        await update.message.reply_text("do you sing?", reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True))
+    elif state == sing:
         user_data[chat_id]["Sing"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Sing": {"select": {"name": text}}})
-        context.user_data["state"] = MIXING
-        keyboard = [["Yes I Am A Professional"], ["Yes I Am An Amateur"], ["No"]]
-        await update.message.reply_text("What is your proficiency in mixing/mastering?", reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True))
-    elif state == MIXING:
+        context.user_data["state"] = mixing
+        keyboard = [["yes i am a professional"], ["yes i am an amateur"], ["no"]]
+        await update.message.reply_text("what is your proficiency in mixing/mastering?", reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True))
+    elif state == mixing:
         user_data[chat_id]["Mixing"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Mixing": {"select": {"name": text}}})
-        context.user_data["state"] = GENRE
-        await update.message.reply_text("What genre do you identify with?\nIf multiple please write them all down", reply_markup=ReplyKeyboardRemove())
-    elif state == GENRE:
+        context.user_data["state"] = genre
+        await update.message.reply_text("what genre do you identify with?\nif multiple please write them all down", reply_markup=ReplyKeyboardRemove())
+    elif state == genre:
         user_data[chat_id]["Genre"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Genre": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = DEMOS
-        await update.message.reply_text("Track/song/demo/beat\nPlease send Soundcloud link")
-    elif state == DEMOS:
+        context.user_data["state"] = demos
+        await update.message.reply_text("track/song/demo/beat\nplease send soundcloud link")
+    elif state == demos:
         user_data[chat_id]["Demos"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Demos": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = LIVE
-        await update.message.reply_text("Vocal performance (for singers)\nPlease send Soundcloud/YouTube link if you are not a singer put -")
-    elif state == LIVE:
+        context.user_data["state"] = live
+        await update.message.reply_text("vocal performance (for singers)\nplease send soundcloud/youtube link if you are not a singer put -")
+    elif state == live:
         user_data[chat_id]["Live"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Live": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = COLLABORATIONS
-        keyboard = [["Face To Face"], ["Online"], ["I Am Not Sure"]]
-        await update.message.reply_text("How do you want to collaborate with other musicians?", reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True))
-    elif state == COLLABORATIONS:
+        context.user_data["state"] = collaborations
+        keyboard = [["face to face"], ["online"], ["i am not sure"]]
+        await update.message.reply_text("how do you want to collaborate with other musicians?", reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True))
+    elif state == collaborations:
         user_data[chat_id]["Collaborations"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Collaborations": {"select": {"name": text}}})
-        context.user_data["state"] = EXPERIENCE
-        await update.message.reply_text("How many years have you been in music industry?", reply_markup=ReplyKeyboardRemove())
-    elif state == EXPERIENCE:
+        context.user_data["state"] = experience
+        await update.message.reply_text("how many years have you been in music industry?", reply_markup=ReplyKeyboardRemove())
+    elif state == experience:
         user_data[chat_id]["Experience"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Experience": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = PLANS
-        await update.message.reply_text("Plans\nTell us about your upcoming releases projects any personal or career plans you have for the near future\nThis is your space to outline your creative direction and aspirations")
-    elif state == PLANS:
+        context.user_data["state"] = plans
+        await update.message.reply_text("plans\ntell us about your upcoming releases projects any personal or career plans you have for the near future\nthis is your space to outline your creative direction and aspirations")
+    elif state == plans:
         user_data[chat_id]["Plans"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Plans": {"rich_text": [{"text": {"content": text}}]}})
-        # ========== ВСТАВЛЯЕМ ПОСТФЛОУ ==========
-        context.user_data["state"] = POST_1
-        await update.message.reply_text(POSTFLOW_1, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Continue", callback_data="continue_post_1")]]))
+        context.user_data["state"] = post_1
+        await update.message.reply_text(POSTFLOW_1, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("continue", callback_data="continue_post_1")]]))
 
-    # --- ARTIST FLOW ---
-    elif state == A_NAME:
+    # artist flow
+    elif state == a_name:
         user_data[chat_id]["Name"] = text
         created = notion.pages.create(
             parent={"database_id": DATABASE_ID},
             properties={
                 "Name": {"title": [{"text": {"content": text}}]},
                 "Telegram": {"rich_text": [{"text": {"content": user_data[chat_id]["Telegram"]}}]},
-                "Type": {"select": {"name": "Artist"}},
+                "Type": {"select": {"name": "artist"}},
             },
         )
         user_page_id[chat_id] = created["id"]
-        context.user_data["state"] = A_COUNTRY
-        await update.message.reply_text("Country")
-    elif state == A_COUNTRY:
+        context.user_data["state"] = a_country
+        await update.message.reply_text("country")
+    elif state == a_country:
         user_data[chat_id]["Country"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Country": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = A_INSTAGRAM
-        await update.message.reply_text("Instagram")
-    elif state == A_INSTAGRAM:
+        context.user_data["state"] = a_instagram
+        await update.message.reply_text("instagram")
+    elif state == a_instagram:
         user_data[chat_id]["Instagram"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Instagram": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = A_SPOTIFY
-        await update.message.reply_text("Spotify")
-    elif state == A_SPOTIFY:
+        context.user_data["state"] = a_spotify
+        await update.message.reply_text("spotify")
+    elif state == a_spotify:
         user_data[chat_id]["Spotify"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Spotify": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = A_ABOUT
-        await update.message.reply_text("About me\nIf you want to share any links, put them here")
-    elif state == A_ABOUT:
+        context.user_data["state"] = a_about
+        await update.message.reply_text("about me\nif you want to share any links, put them here")
+    elif state == a_about:
         user_data[chat_id]["About"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"About": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = A_PLANS
-        await update.message.reply_text("Plans\nTell us about your upcoming releases, projects, any personal or career plans you have for the near future\nThis is your space to outline your creative direction and aspirations")
-    elif state == A_PLANS:
+        context.user_data["state"] = a_plans
+        await update.message.reply_text("plans\ntell us about your upcoming releases, projects, any personal or career plans you have for the near future\nthis is your space to outline your creative direction and aspirations")
+    elif state == a_plans:
         user_data[chat_id]["Plans"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Plans": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = A_LIVE
-        await update.message.reply_text("Live videos")
-    elif state == A_LIVE:
+        context.user_data["state"] = a_live
+        await update.message.reply_text("live videos")
+    elif state == a_live:
         user_data[chat_id]["Live"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Live": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = A_DEMOS
-        await update.message.reply_text("Demos\nOnly soundcloud, please")
-    elif state == A_DEMOS:
+        context.user_data["state"] = a_demos
+        await update.message.reply_text("demos\nonly soundcloud, please")
+    elif state == a_demos:
         user_data[chat_id]["Demos"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Demos": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = A_COLLABORATIONS
+        context.user_data["state"] = a_collaborations
         keyboard = [
-            [InlineKeyboardButton("Yes", callback_data="artist_collab_yes")],
-            [InlineKeyboardButton("No", callback_data="artist_collab_no")],
+            [InlineKeyboardButton("yes", callback_data="artist_collab_yes")],
+            [InlineKeyboardButton("no", callback_data="artist_collab_no")],
         ]
-        await update.message.reply_text("Are you open for collaborations?", reply_markup=InlineKeyboardMarkup(keyboard))
+        await update.message.reply_text("are you open for collaborations?", reply_markup=InlineKeyboardMarkup(keyboard))
 
-    # --- DESIGNER FLOW ---
-    elif state == D_NAME:
+    # designer flow
+    elif state == d_name:
         user_data[chat_id]["Name"] = text
         created = notion.pages.create(
             parent={"database_id": DATABASE_ID},
             properties={
                 "Name": {"title": [{"text": {"content": text}}]},
                 "Telegram": {"rich_text": [{"text": {"content": user_data[chat_id]["Telegram"]}}]},
-                "Type": {"select": {"name": "Designer"}},
+                "Type": {"select": {"name": "designer"}},
             },
         )
         user_page_id[chat_id] = created["id"]
-        context.user_data["state"] = D_COUNTRY
-        await update.message.reply_text("Your location?")
-    elif state == D_COUNTRY:
+        context.user_data["state"] = d_country
+        await update.message.reply_text("your location?")
+    elif state == d_country:
         user_data[chat_id]["Country"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Country": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = D_OCCUPATION
+        context.user_data["state"] = d_occupation
         keyboard = [
-            [InlineKeyboardButton("Interface Designer", callback_data="designer_occ_interface")],
-            [InlineKeyboardButton("Graphic Designer", callback_data="designer_occ_graphic")],
-            [InlineKeyboardButton("Motion Designer", callback_data="designer_occ_motion")],
-            [InlineKeyboardButton("Fashion Designer", callback_data="designer_occ_fashion")],
+            [InlineKeyboardButton("interface designer", callback_data="designer_occ_interface")],
+            [InlineKeyboardButton("graphic designer", callback_data="designer_occ_graphic")],
+            [InlineKeyboardButton("motion designer", callback_data="designer_occ_motion")],
+            [InlineKeyboardButton("fashion designer", callback_data="designer_occ_fashion")],
         ]
-        await update.message.reply_text("What is your specialization?", reply_markup=InlineKeyboardMarkup(keyboard))
-    elif state == D_GENRE:
+        await update.message.reply_text("what is your specialization?", reply_markup=InlineKeyboardMarkup(keyboard))
+    elif state == d_genre:
         user_data[chat_id]["Genre"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Genre": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = D_DEMOS
-        await update.message.reply_text("Portfolio")
-    elif state == D_DEMOS:
+        context.user_data["state"] = d_demos
+        await update.message.reply_text("portfolio")
+    elif state == d_demos:
         user_data[chat_id]["Demos"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Demos": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = D_ABOUT
-        await update.message.reply_text("Describe your design style")
-    elif state == D_ABOUT:
+        context.user_data["state"] = d_about
+        await update.message.reply_text("describe your design style")
+    elif state == d_about:
         user_data[chat_id]["About"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"About": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = D_INSTAGRAM
-        await update.message.reply_text("Social networks")
-    elif state == D_INSTAGRAM:
+        context.user_data["state"] = d_instagram
+        await update.message.reply_text("social networks")
+    elif state == d_instagram:
         user_data[chat_id]["Instagram"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Instagram": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = D_INSTRUMENTS_CONTEXT
-        await update.message.reply_text("What programs/softwares and tools do you use in your work?")
-    elif state == D_INSTRUMENTS_CONTEXT:
+        context.user_data["state"] = d_instruments_context
+        await update.message.reply_text("what programs/softwares and tools do you use in your work?")
+    elif state == d_instruments_context:
         user_data[chat_id]["Instruments Context"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Instruments Context": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = D_PLANS
-        await update.message.reply_text("Tell a bit about your dream in our project: your ideas for collaba community")
-    elif state == D_PLANS:
+        context.user_data["state"] = d_plans
+        await update.message.reply_text("tell a bit about your dream in our project: your ideas for collaba community")
+    elif state == d_plans:
         user_data[chat_id]["Plans"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Plans": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = POST_1
-        await update.message.reply_text(POSTFLOW_1, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Continue", callback_data="continue_post_1")]]))
+        context.user_data["state"] = post_1
+        await update.message.reply_text(POSTFLOW_1, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("continue", callback_data="continue_post_1")]]))
 
-    # --- VIDEOMAKER FLOW ---
-    elif state == V_NAME:
+    # videomaker flow
+    elif state == v_name:
         user_data[chat_id]["Name"] = text
         created = notion.pages.create(
             parent={"database_id": DATABASE_ID},
             properties={
                 "Name": {"title": [{"text": {"content": text}}]},
                 "Telegram": {"rich_text": [{"text": {"content": user_data[chat_id]["Telegram"]}}]},
-                "Type": {"select": {"name": "Videomaker"}},
+                "Type": {"select": {"name": "videomaker"}},
             },
         )
         user_page_id[chat_id] = created["id"]
-        context.user_data["state"] = V_COUNTRY
-        await update.message.reply_text("Your location?")
-    elif state == V_COUNTRY:
+        context.user_data["state"] = v_country
+        await update.message.reply_text("your location?")
+    elif state == v_country:
         user_data[chat_id]["Country"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Country": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = V_OCCUPATION
-        await update.message.reply_text("What is your position?")
-    elif state == V_OCCUPATION:
+        context.user_data["state"] = v_occupation
+        await update.message.reply_text("what is your position?")
+    elif state == v_occupation:
         user_data[chat_id]["Occupation"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Occupation": {"select": {"name": text}}})
-        context.user_data["state"] = V_GENRE
-        await update.message.reply_text("What are your specific skills?")
-    elif state == V_GENRE:
+        context.user_data["state"] = v_genre
+        await update.message.reply_text("what are your specific skills?")
+    elif state == v_genre:
         user_data[chat_id]["Genre"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Genre": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = V_DEMOS
-        await update.message.reply_text("Portfolio")
-    elif state == V_DEMOS:
+        context.user_data["state"] = v_demos
+        await update.message.reply_text("portfolio")
+    elif state == v_demos:
         user_data[chat_id]["Demos"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Demos": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = V_INSTAGRAM
-        await update.message.reply_text("Social networks")
-    elif state == V_INSTAGRAM:
+        context.user_data["state"] = v_instagram
+        await update.message.reply_text("social networks")
+    elif state == v_instagram:
         user_data[chat_id]["Instagram"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Instagram": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = V_PLANS
-        await update.message.reply_text("Tell a bit about your dream in our project: your ideas for collaba community")
-    elif state == V_PLANS:
+        context.user_data["state"] = v_plans
+        await update.message.reply_text("tell a bit about your dream in our project: your ideas for collaba community")
+    elif state == v_plans:
         user_data[chat_id]["Plans"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Plans": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = V_INSTRUMENTS_CONTEXT
-        await update.message.reply_text("Do you have any equipment? If yes, what kind?")
-    elif state == V_INSTRUMENTS_CONTEXT:
+        context.user_data["state"] = v_instruments_context
+        await update.message.reply_text("do you have any equipment? if yes, what kind?")
+    elif state == v_instruments_context:
         user_data[chat_id]["Instruments Context"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Instruments Context": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = V_ABOUT
-        await update.message.reply_text("What programs and tools do you use in your work?")
-    elif state == V_ABOUT:
+        context.user_data["state"] = v_about
+        await update.message.reply_text("what programs and tools do you use in your work?")
+    elif state == v_about:
         user_data[chat_id]["About"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"About": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = POST_1
-        await update.message.reply_text(POSTFLOW_1, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Continue", callback_data="continue_post_1")]]))
+        context.user_data["state"] = post_1
+        await update.message.reply_text(POSTFLOW_1, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("continue", callback_data="continue_post_1")]]))
 
-    # --- LITTLE STAR FLOW ---
-    elif state == LS_NAME:
+    # little star flow
+    elif state == ls_name:
         user_data[chat_id]["Name"] = text
         created = notion.pages.create(
             parent={"database_id": DATABASE_ID},
             properties={
                 "Name": {"title": [{"text": {"content": text}}]},
                 "Telegram": {"rich_text": [{"text": {"content": user_data[chat_id]["Telegram"]}}]},
-                "Type": {"select": {"name": "Little Star"}},
+                "Type": {"select": {"name": "little star"}},
             },
         )
         user_page_id[chat_id] = created["id"]
-        context.user_data["state"] = LS_COUNTRY
-        await update.message.reply_text("Your location?")
-    elif state == LS_COUNTRY:
+        context.user_data["state"] = ls_country
+        await update.message.reply_text("your location?")
+    elif state == ls_country:
         user_data[chat_id]["Country"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Country": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = LS_GENRE
-        await update.message.reply_text("What are your specific skills?")
-    elif state == LS_GENRE:
+        context.user_data["state"] = ls_genre
+        await update.message.reply_text("what are your specific skills?")
+    elif state == ls_genre:
         user_data[chat_id]["Genre"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Genre": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = LS_INSTAGRAM
-        await update.message.reply_text("Social networks")
-    elif state == LS_INSTAGRAM:
+        context.user_data["state"] = ls_instagram
+        await update.message.reply_text("social networks")
+    elif state == ls_instagram:
         user_data[chat_id]["Instagram"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Instagram": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = LS_PLANS
-        await update.message.reply_text("Tell a bit about your dream in our project: your ideas for collaba community")
-    elif state == LS_PLANS:
+        context.user_data["state"] = ls_plans
+        await update.message.reply_text("tell a bit about your dream in our project: your ideas for collaba community")
+    elif state == ls_plans:
         user_data[chat_id]["Plans"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Plans": {"rich_text": [{"text": {"content": text}}]}})
-        context.user_data["state"] = POST_1
-        await update.message.reply_text(POSTFLOW_1, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Continue", callback_data="continue_post_1")]]))
+        context.user_data["state"] = post_1
+        await update.message.reply_text(POSTFLOW_1, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("continue", callback_data="continue_post_1")]]))
 
-
-# ========== HANDLERS FOR INLINE BUTTONS (DESIGNER OCC, ARTIST COLLAB, SONGWRITER, PRODUCE) ==========
-async def designer_specialization_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    query = update.callback_query
-    chat_id = query.from_user.id
-    occ_map = {
-        "designer_occ_interface": "Interface Designer",
-        "designer_occ_graphic": "Graphic Designer",
-        "designer_occ_motion": "Motion Designer",
-        "designer_occ_fashion": "Fashion Designer",
-    }
-    occ = occ_map.get(query.data)
-    if not occ:
-        await query.answer()
-        return
-    user_data[chat_id]["Occupation"] = occ
-    notion.pages.update(page_id=user_page_id[chat_id], properties={"Occupation": {"select": {"name": occ}}})
-    context.user_data["state"] = D_GENRE
-    await query.edit_message_text("What are your specific skills?")
-
-async def artist_collab_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    query = update.callback_query
-    chat_id = query.from_user.id
-    if query.data == "artist_collab_yes":
-        collab = "Yes"
-    elif query.data == "artist_collab_no":
-        collab = "No"
-    else:
-        await query.answer()
-        return
-    user_data[chat_id]["Collaborations"] = collab
-    notion.pages.update(page_id=user_page_id[chat_id], properties={"Collaborations": {"select": {"name": collab}}})
-    context.user_data["state"] = A_SONGWRITER
-    keyboard = [
-        [InlineKeyboardButton("Yes I Am", callback_data="artist_sw_yes")],
-        [InlineKeyboardButton("My Teammate Is", callback_data="artist_sw_teammate")],
-        [InlineKeyboardButton("No", callback_data="artist_sw_no")],
-    ]
-    await query.edit_message_text("Are you a songwriter? Or someone from your team is?", reply_markup=InlineKeyboardMarkup(keyboard))
-
-async def artist_songwriter_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    query = update.callback_query
-    chat_id = query.from_user.id
-    sw_map = {
-        "artist_sw_yes": "Yes I Am",
-        "artist_sw_teammate": "My Teammate Is",
-        "artist_sw_no": "No"
-    }
-    sw = sw_map.get(query.data)
-    if not sw:
-        await query.answer()
-        return
-    user_data[chat_id]["Songwriter"] = sw
-    notion.pages.update(page_id=user_page_id[chat_id], properties={"Songwriter": {"select": {"name": sw}}})
-    context.user_data["state"] = A_PRODUCE
-    keyboard = [
-        [InlineKeyboardButton("Yes I Am A Professional", callback_data="artist_prod_prof")],
-        [InlineKeyboardButton("Yes I Am An Amateur", callback_data="artist_prod_amateur")],
-        [InlineKeyboardButton("No", callback_data="artist_prod_no")],
-    ]
-    await query.edit_message_text("Do you produce music yourself?", reply_markup=InlineKeyboardMarkup(keyboard))
-
-async def artist_produce_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    query = update.callback_query
-    chat_id = query.from_user.id
-    prod_map = {
-        "artist_prod_prof": "Yes I Am A Professional",
-        "artist_prod_amateur": "Yes I Am An Amateur",
-        "artist_prod_no": "No"
-    }
-    prod = prod_map.get(query.data)
-    if not prod:
-        await query.answer()
-        return
-    user_data[chat_id]["Produce"] = prod
-    notion.pages.update(page_id=user_page_id[chat_id], properties={"Produce": {"select": {"name": prod}}})
-    # ПОСТФЛОУ!
-    context.user_data["state"] = POST_1
-    await query.edit_message_text(POSTFLOW_1, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Continue", callback_data="continue_post_1")]]))
-
-
-# ========== MAIN ==========
+# ========== main ==========
 def main() -> None:
     if not TELEGRAM_TOKEN:
-        raise RuntimeError("BOT_TOKEN env var is missing")
+        raise RuntimeError("bot_token env var is missing")
     if not (NOTION_TOKEN and DATABASE_ID):
-        raise RuntimeError("Notion env vars are missing")
+        raise RuntimeError("notion env vars are missing")
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(button_handler, pattern="^(?!designer_occ_|artist_collab_|artist_sw_|artist_prod_).*"))
