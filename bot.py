@@ -211,14 +211,14 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             [InlineKeyboardButton("The Important Doc", callback_data="read_doc")],
             [InlineKeyboardButton("No Time To Read", callback_data="skip_doc")],
         ]
-        await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
+        await context.bot.send_message(chat_id=query.message.chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard))
     elif query.data == "skip_doc":
         text = "No skipping. It’s that fkng important"
         keyboard = [
             [InlineKeyboardButton("Ok", callback_data="end_bot")],
             [InlineKeyboardButton("Go Back", callback_data="step_1")],
         ]
-        await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
+        await context.bot.send_message(chat_id=query.message.chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard))
     elif query.data == "read_doc":
         keyboard = [
             [
@@ -234,10 +234,10 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 )
             ],
         ]
-        await query.edit_message_text(
-            MANIFESTO_TEXT,
+        await context.bot.send_message(
+            chat_id=query.message.chat_id,
+            text=MANIFESTO_TEXT,
             reply_markup=InlineKeyboardMarkup(keyboard),
-            parse_mode=None,
         )
     elif query.data == "reject_manifesto":
         text = JUST_VIBING_TEXT
@@ -245,7 +245,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             [InlineKeyboardButton("Ok", callback_data="end_bot")],
             [InlineKeyboardButton("Go Back", callback_data="read_doc")],
         ]
-        await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
+        await context.bot.send_message(chat_id=query.message.chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard))
     elif query.data == "agree_manifesto":
         text = "Alrighty, your turn. Have we crossed paths before? 👀"
         keyboard = [
@@ -256,7 +256,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 )
             ]
         ]
-        await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
+        await context.bot.send_message(chat_id=query.message.chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard))
     elif query.data == "start_survey":
         keyboard = [
             [InlineKeyboardButton("Artist", callback_data="role_artist")],
@@ -265,9 +265,9 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             [InlineKeyboardButton("Videomaker", callback_data="role_videomaker")],
             [InlineKeyboardButton("Mom Calls Me My Little Star", callback_data="role_star")],
         ]
-        await query.edit_message_text("Who are you?", reply_markup=InlineKeyboardMarkup(keyboard))
+        await context.bot.send_message(chat_id=query.message.chat_id, text="Who are you?", reply_markup=InlineKeyboardMarkup(keyboard))
     elif query.data == "end_bot":
-        await query.edit_message_text("👋 Bye.")
+        await context.bot.send_message(chat_id=query.message.chat_id, text="👋 Bye.")
         # Очищаем состояние, если вдруг
         context.user_data.clear()
         user_data.pop(query.from_user.id, None)
@@ -280,7 +280,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             "Type": "Musician",
         }
         context.user_data["state"] = NAME
-        await query.edit_message_text("Name/artist name *")
+        await context.bot.send_message(chat_id=query.message.chat_id, text="Name/artist name *")
     elif query.data == "role_artist":
         user_data[query.from_user.id] = {
             "Telegram": f"@{query.from_user.username}" if query.from_user.username else "",
@@ -288,7 +288,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             "Type": "Artist",
         }
         context.user_data["state"] = A_NAME
-        await query.edit_message_text("Name/artist name")
+        await context.bot.send_message(chat_id=query.message.chat_id, text="Name/artist name")
     elif query.data == "role_designer":
         user_data[query.from_user.id] = {
             "Telegram": f"@{query.from_user.username}" if query.from_user.username else "",
@@ -296,7 +296,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             "Type": "Designer",
         }
         context.user_data["state"] = D_NAME
-        await query.edit_message_text("What is your name?")
+        await context.bot.send_message(chat_id=query.message.chat_id, text="What is your name?")
     elif query.data == "role_videomaker":
         user_data[query.from_user.id] = {
             "Telegram": f"@{query.from_user.username}" if query.from_user.username else "",
@@ -304,7 +304,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             "Type": "Videomaker",
         }
         context.user_data["state"] = V_NAME
-        await query.edit_message_text("What is your name?")
+        await context.bot.send_message(chat_id=query.message.chat_id, text="What is your name?")
     elif query.data == "role_star":
         user_data[query.from_user.id] = {
             "Telegram": f"@{query.from_user.username}" if query.from_user.username else "",
@@ -312,39 +312,39 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             "Type": "Little Star",
         }
         context.user_data["state"] = LS_NAME
-        await query.edit_message_text("What is your name?")
+        await context.bot.send_message(chat_id=query.message.chat_id, text="What is your name?")
     # ========== POSTFLOW ==========
     elif query.data == "continue_post_1":
         context.user_data["state"] = POST_2
-        await query.edit_message_text(POSTFLOW_2, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Continue", callback_data="continue_post_2")]]))
+        await context.bot.send_message(chat_id=query.message.chat_id, text=POSTFLOW_2, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Continue", callback_data="continue_post_2")]]))
     elif query.data == "continue_post_2":
         context.user_data["state"] = POST_3
-        await query.edit_message_text(POSTFLOW_3, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Continue", callback_data="continue_post_3")]]))
+        await context.bot.send_message(chat_id=query.message.chat_id, text=POSTFLOW_3, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Continue", callback_data="continue_post_3")]]))
     elif query.data == "continue_post_3":
         context.user_data["state"] = FINAL_CHOICE
         keyboard = [
             [InlineKeyboardButton("Ok Ok Ok I Promise", callback_data="ok_i_promise")],
             [InlineKeyboardButton("Lowkey Just Vibing And Watching", callback_data="just_vibing")],
         ]
-        await query.edit_message_text(FINAL_CHOICE_TEXT, reply_markup=InlineKeyboardMarkup(keyboard))
+        await context.bot.send_message(chat_id=query.message.chat_id, text=FINAL_CHOICE_TEXT, reply_markup=InlineKeyboardMarkup(keyboard))
     elif query.data == "just_vibing":
         keyboard = [
             [InlineKeyboardButton("OK", callback_data="end_bot")],
             [InlineKeyboardButton("Go Back", callback_data="back_to_final_choice")],
         ]
-        await query.edit_message_text(JUST_VIBING_TEXT, reply_markup=InlineKeyboardMarkup(keyboard))
+        await context.bot.send_message(chat_id=query.message.chat_id, text=JUST_VIBING_TEXT, reply_markup=InlineKeyboardMarkup(keyboard))
     elif query.data == "back_to_final_choice":
         context.user_data["state"] = FINAL_CHOICE
         keyboard = [
             [InlineKeyboardButton("Ok Ok Ok I Promise", callback_data="ok_i_promise")],
             [InlineKeyboardButton("Lowkey Just Vibing And Watching", callback_data="just_vibing")],
         ]
-        await query.edit_message_text(FINAL_CHOICE_TEXT, reply_markup=InlineKeyboardMarkup(keyboard))
+        await context.bot.send_message(chat_id=query.message.chat_id, text=FINAL_CHOICE_TEXT, reply_markup=InlineKeyboardMarkup(keyboard))
     elif query.data == "ok_i_promise":
         context.user_data["state"] = VIBE_CHECK
-        await query.edit_message_text(VIBE_CHECK_TEXT, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("cllb, I Think Love U Already", callback_data="love_u")]]))
+        await context.bot.send_message(chat_id=query.message.chat_id, text=VIBE_CHECK_TEXT, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("cllb, I Think Love U Already", callback_data="love_u")]]))
     elif query.data == "love_u":
-        await query.edit_message_text(READY_FOR_FUN_TEXT, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Join Community", url="https://t.me/addlist/QfvdyHJcGfg2NGZi")]]))
+        await context.bot.send_message(chat_id=query.message.chat_id, text=READY_FOR_FUN_TEXT, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Join Community", url="https://t.me/addlist/QfvdyHJcGfg2NGZi")]]))
         # Очистка всех данных после последнего экрана:
         context.user_data.clear()
         user_data.pop(query.from_user.id, None)
@@ -660,7 +660,8 @@ async def designer_specialization_handler(update: Update, context: ContextTypes.
     user_data[chat_id]["Occupation"] = occ
     notion.pages.update(page_id=user_page_id[chat_id], properties={"Occupation": {"select": {"name": occ}}})
     context.user_data["state"] = D_GENRE
-    await query.edit_message_text("What are your specific skills?")
+    await context.bot.send_message(chat_id=query.message.chat_id, text="What are your specific skills?")
+    await query.answer()
 
 async def artist_collab_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
@@ -680,7 +681,8 @@ async def artist_collab_handler(update: Update, context: ContextTypes.DEFAULT_TY
         [InlineKeyboardButton("My Teammate Is", callback_data="artist_sw_teammate")],
         [InlineKeyboardButton("No", callback_data="artist_sw_no")],
     ]
-    await query.edit_message_text("Are you a songwriter? Or someone from your team is?", reply_markup=InlineKeyboardMarkup(keyboard))
+    await context.bot.send_message(chat_id=query.message.chat_id, text="Are you a songwriter? Or someone from your team is?", reply_markup=InlineKeyboardMarkup(keyboard))
+    await query.answer()
 
 async def artist_songwriter_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
@@ -702,7 +704,8 @@ async def artist_songwriter_handler(update: Update, context: ContextTypes.DEFAUL
         [InlineKeyboardButton("Yes I Am An Amateur", callback_data="artist_prod_amateur")],
         [InlineKeyboardButton("No", callback_data="artist_prod_no")],
     ]
-    await query.edit_message_text("Do you produce music yourself?", reply_markup=InlineKeyboardMarkup(keyboard))
+    await context.bot.send_message(chat_id=query.message.chat_id, text="Do you produce music yourself?", reply_markup=InlineKeyboardMarkup(keyboard))
+    await query.answer()
 
 async def artist_produce_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
@@ -720,8 +723,8 @@ async def artist_produce_handler(update: Update, context: ContextTypes.DEFAULT_T
     notion.pages.update(page_id=user_page_id[chat_id], properties={"Produce": {"select": {"name": prod}}})
     # ПОСТФЛОУ!
     context.user_data["state"] = POST_1
-    await query.edit_message_text(POSTFLOW_1, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Continue", callback_data="continue_post_1")]]))
-
+    await context.bot.send_message(chat_id=query.message.chat_id, text=POSTFLOW_1, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Continue", callback_data="continue_post_1")]]))
+    await query.answer()
 
 # ========== MAIN ==========
 def main() -> None:
