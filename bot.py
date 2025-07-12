@@ -58,10 +58,11 @@ MANIFESTO_TEXT = (
     "This isn’t business.\n"
     "This is lowkey a cult (just kidding)\n"
     "Not a product. A group hug in mp3.\n\n"
-    "welcome to cllb."
 )
 
 POSTFLOW_1 = (
+    "Thank you! Got it!\n\n"
+    "Ok, still here awesome just a few things left to share and you are allllmost here vibing with all of us:\n\n"
     "What is cllllllllllllb?\n\n"
     "We’re not a label-label.\n"
     "We’re a music-flavored community with zero chill for perfection and a soft spot for weird sounds, late-night ideas, and collabs that make no sense on paper.\n"
@@ -140,16 +141,16 @@ POSTFLOW_3 = (
     "• Chaos\n"
     "• Creative fuel\n"
     "• A stage we’re all building together\n\n"
-    "The Core Gremlins aka the cllb team\n\n"
+    "The core Pokémons aka the cllb team\n\n"
     "They scout, curate, troubleshoot, build, and occasionally cry in the group chat.\n"
     "They keep it all moving, connecting dots and people like it’s a Mario Kart shortcut.\n\n"
     "DM us:\n"
-    "Dasha – [@daria_kraski]\n"
-    "Mila – [@MilaIgnatevaa]\n"
-    "Eugene – [@boysdontexist]\n"
-    "Emil – [@colasigna]\n"
-    "Bogdan – [@dolgopolsque]\n"
-    "Ivan – [@🕳️]\n\n"
+    "Dasha – [@daria_kraski] – if you got lost\n"
+    "Eugene – [@boysdontexist] – if you've lost your soul/ mind/ purpose\n"
+    "Mila – [@MilaIgnatevaa] – if you've lost the cllb passwords\n"
+    "Emil – [@colasigna] – if you've lost a cool guy from the community comments\n"
+    "Bogdan – [@dolgopolsque] – if you found a great solution on how to make cllb even more visually attractive\n"
+    "Ivan – [@🕳️] – one day he will text you first\n\n"
     "Final Words\n\n"
     "We’re not a label.\n"
     "We’re not an agency.\n"
@@ -158,7 +159,6 @@ POSTFLOW_3 = (
     "You don’t need permission.\n"
     "You don’t need to be perfect.\n"
     "You just need to show up.\n"
-    "Welcome to cllllllllllllb."
 )
 
 FINAL_CHOICE_TEXT = (
@@ -188,7 +188,7 @@ READY_FOR_FUN_TEXT = (
     "Looks like you're ready for some fun, huh?"
 )
 JUST_VIBING_TEXT = (
-    "Oh and hey — hit that subscribe button\n\nhttps://linktree.com/cllllllllllllb"
+    "Oh and hey! See you!"
 )
 
 # ========== START SCREEN ==========
@@ -240,12 +240,10 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             reply_markup=InlineKeyboardMarkup(keyboard),
         )
     elif query.data == "reject_manifesto":
-        text = JUST_VIBING_TEXT
         keyboard = [
-            [InlineKeyboardButton("Ok", callback_data="end_bot")],
-            [InlineKeyboardButton("Go Back", callback_data="read_doc")],
+            [InlineKeyboardButton("Subscribe", url="https://linktr.ee/cllllllllllllb")],
         ]
-        await context.bot.send_message(chat_id=query.message.chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard))
+        await context.bot.send_message(chat_id=query.message.chat_id, text=JUST_VIBING_TEXT, reply_markup=InlineKeyboardMarkup(keyboard))
     elif query.data == "agree_manifesto":
         text = "Alrighty, your turn. Have we crossed paths before? 👀"
         keyboard = [
@@ -267,8 +265,10 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         ]
         await context.bot.send_message(chat_id=query.message.chat_id, text="Who are you?", reply_markup=InlineKeyboardMarkup(keyboard))
     elif query.data == "end_bot":
-        await context.bot.send_message(chat_id=query.message.chat_id, text="👋 Bye.")
-        # Очищаем состояние, если вдруг
+        keyboard = [
+            [InlineKeyboardButton("Subscribe", url="https://linktr.ee/cllllllllllllb")],
+        ]
+        await context.bot.send_message(chat_id=query.message.chat_id, text=JUST_VIBING_TEXT, reply_markup=InlineKeyboardMarkup(keyboard))
         context.user_data.clear()
         user_data.pop(query.from_user.id, None)
         user_page_id.pop(query.from_user.id, None)
@@ -329,8 +329,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await context.bot.send_message(chat_id=query.message.chat_id, text=FINAL_CHOICE_TEXT, reply_markup=InlineKeyboardMarkup(keyboard))
     elif query.data == "just_vibing":
         keyboard = [
-            [InlineKeyboardButton("OK", callback_data="end_bot")],
-            [InlineKeyboardButton("Go Back", callback_data="back_to_final_choice")],
+            [InlineKeyboardButton("Subscribe", url="https://linktr.ee/cllllllllllllb")],
         ]
         await context.bot.send_message(chat_id=query.message.chat_id, text=JUST_VIBING_TEXT, reply_markup=InlineKeyboardMarkup(keyboard))
     elif query.data == "back_to_final_choice":
@@ -344,8 +343,10 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         context.user_data["state"] = VIBE_CHECK
         await context.bot.send_message(chat_id=query.message.chat_id, text=VIBE_CHECK_TEXT, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("cllb, I Think Love U Already", callback_data="love_u")]]))
     elif query.data == "love_u":
-        await context.bot.send_message(chat_id=query.message.chat_id, text=READY_FOR_FUN_TEXT, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Join Community", url="https://t.me/addlist/QfvdyHJcGfg2NGZi")]]))
-        # Очистка всех данных после последнего экрана:
+        keyboard = [
+            [InlineKeyboardButton("Subscribe", url="https://linktr.ee/cllllllllllllb")],
+        ]
+        await context.bot.send_message(chat_id=query.message.chat_id, text=JUST_VIBING_TEXT, reply_markup=InlineKeyboardMarkup(keyboard))
         context.user_data.clear()
         user_data.pop(query.from_user.id, None)
         user_page_id.pop(query.from_user.id, None)
@@ -438,7 +439,6 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     elif state == PLANS:
         user_data[chat_id]["Plans"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Plans": {"rich_text": [{"text": {"content": text}}]}})
-        # ========== ВСТАВЛЯЕМ ПОСТФЛОУ ==========
         context.user_data["state"] = POST_1
         await update.message.reply_text(POSTFLOW_1, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Continue", callback_data="continue_post_1")]]))
 
@@ -545,7 +545,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         user_data[chat_id]["Instruments Context"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Instruments Context": {"rich_text": [{"text": {"content": text}}]}})
         context.user_data["state"] = D_PLANS
-        await update.message.reply_text("Tell a bit about your dream in our project: your ideas for collaba community")
+        await update.message.reply_text("Tell a bit about the idea you would like to host with collaba community")
     elif state == D_PLANS:
         user_data[chat_id]["Plans"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Plans": {"rich_text": [{"text": {"content": text}}]}})
@@ -590,7 +590,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         user_data[chat_id]["Instagram"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Instagram": {"rich_text": [{"text": {"content": text}}]}})
         context.user_data["state"] = V_PLANS
-        await update.message.reply_text("Tell a bit about your dream in our project: your ideas for collaba community")
+        await update.message.reply_text("Tell a bit about the idea you would like to host with collaba community")
     elif state == V_PLANS:
         user_data[chat_id]["Plans"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Plans": {"rich_text": [{"text": {"content": text}}]}})
@@ -635,7 +635,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         user_data[chat_id]["Instagram"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Instagram": {"rich_text": [{"text": {"content": text}}]}})
         context.user_data["state"] = LS_PLANS
-        await update.message.reply_text("Tell a bit about your dream in our project: your ideas for collaba community")
+        await update.message.reply_text("Tell a bit about the idea you would like to host with collaba community")
     elif state == LS_PLANS:
         user_data[chat_id]["Plans"] = text
         notion.pages.update(page_id=user_page_id[chat_id], properties={"Plans": {"rich_text": [{"text": {"content": text}}]}})
