@@ -36,7 +36,7 @@ user_page_id: dict[int, str] = {}
     V_NAME, V_COUNTRY, V_OCCUPATION, V_GENRE, V_DEMOS, V_INSTAGRAM, V_PLANS, V_INSTRUMENTS_CONTEXT, V_ABOUT,
     LS_NAME, LS_COUNTRY, LS_GENRE, LS_INSTAGRAM, LS_PLANS,
     POST_1, POST_2, POST_3, FINAL_CHOICE, VIBE_CHECK
-) = range(50)
+) = range(46)
 
 # ========== TEXT BLOCKS ==========
 POSTFLOW_1_PART1 = """what is cllllllllllllb?
