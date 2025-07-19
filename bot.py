@@ -26,20 +26,20 @@ user_page_id: dict[int, str] = {}
 
 # ========== STATES ==========
 (
-    # Artist states
+    # Artist
     A_NAME, A_COUNTRY, A_INSTAGRAM, A_SPOTIFY,
     A_ABOUT, A_PLANS, A_LIVE, A_DEMOS, A_COLLAB,
     A_SONGWRITER, A_PRODUCE,
-    # Musician states
+    # Musician
     M_NAME, M_SOCIAL, M_LOCATION, M_OCCUPATION, M_INSTRUMENTS, M_INST_CONTEXT,
     M_SING, M_MIXING, M_GENRE, M_DEMOS, M_VOCAL, M_COLLAB, M_EXPERIENCE, M_PLANS,
-    # Designer states
+    # Designer
     D_NAME, D_LOCATION, D_OCCUPATION, D_SKILLS, D_DEMOS, D_STYLE, D_SOCIAL, D_GENRE, D_PLANS,
-    # Videomaker states (новый флоу)
+    # Videomaker (НОВЫЙ ФЛОУ)
     V_NAME, V_LOCATION, V_OCCUPATION, V_GENRE, V_DEMOS, V_SOCIAL, V_PLANS, V_INSTR_CONTEXT, V_ABOUT,
-    # Star states
-    S_NAME, S_SOCIAL, S_LOCATION, S_ABOUT, S_PLANS
-) = range(49)
+    # Star
+    S_NAME, S_SOCIAL, S_LOCATION, S_ABOUT, S_PLANS,
+) = range(48)
 
 # ========== POSTFLOW TEXT ==========
 POSTFLOW_1 = (
@@ -171,7 +171,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         user_data[chat_id] = {"Telegram": f"@{query.from_user.username}" if query.from_user.username else "", "Type": "Designer"}
         context.user_data["state"] = D_NAME
         await query.message.reply_text("What is your name?")
-    # ========== VIDEOMAKER FLOW (кнопка) ==========
+    # ========== VIDEOMAKER FLOW (НОВЫЙ) ==========
     elif data == "role_videomaker":
         user_data[chat_id] = {
             "Telegram": f"@{query.from_user.username}" if query.from_user.username else "",
@@ -183,7 +183,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         user_data[chat_id] = {"Telegram": f"@{query.from_user.username}" if query.from_user.username else "", "Type": "Star"}
         context.user_data["state"] = S_NAME
         await query.message.reply_text("Name / Star name *")
-    # Остальные кнопки — без изменений
     elif data == "continue_post_1":
         await query.message.reply_text("Welcome to the crew! 🎉")
 
@@ -192,10 +191,9 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     text = update.message.text.strip()
     state = context.user_data.get("state")
 
-    # ========== VIDEOMAKER FLOW ==========
+    # ========== VIDEOMAKER FLOW (НОВЫЙ) ==========
     if state == V_NAME:
         user_data[chat_id]["Name"] = text
-        # Создаем новую строку в Notion
         created = notion.pages.create(
             parent={"database_id": DATABASE_ID},
             properties={
