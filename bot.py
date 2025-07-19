@@ -193,7 +193,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await query.message.reply_text("Name / Star name *")
 
     # ========== ARTIST BUTTONS ==========
-    # Collaborations (исправленный обработчик!)
     elif data in ("artist_collab_yes", "artist_collab_no"):
         collab = "Yes" if data == "artist_collab_yes" else "No"
         await query.message.reply_text(collab)
@@ -214,104 +213,31 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             ])
         )
 
-    # Songwriter
-    elif data in ("artist_sw_yes", "artist_sw_teammate", "artist_sw_no"):
-        sw_map = {"artist_sw_yes": "Yes I Am", "artist_sw_teammate": "My Teammate Is", "artist_sw_no": "No"}
-        sw = sw_map[data]
-        await query.message.reply_text(sw)
-        notion.pages.update(page_id=user_page_id[chat_id], properties={"Songwriter": {"select": {"name": sw}}})
-        context.user_data["state"] = A_PRODUCE
-        await query.message.reply_text(
-            "Do you produce music yourself?",
-            reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("Yes I Am A Professional", callback_data="artist_prod_prof")],
-                [InlineKeyboardButton("Yes I Am An Amateur", callback_data="artist_prod_amateur")],
-                [InlineKeyboardButton("No", callback_data="artist_prod_no")],
-            ])
-        )
-
-    # Produce
-    elif data in ("artist_prod_prof", "artist_prod_amateur", "artist_prod_no"):
-        prod_map = {"artist_prod_prof": "Yes I Am A Professional", "artist_prod_amateur": "Yes I Am An Amateur", "artist_prod_no": "No"}
-        prod = prod_map[data]
-        await query.message.reply_text(prod)
-        notion.pages.update(page_id=user_page_id[chat_id], properties={"Produce": {"select": {"name": prod}}})
-        await query.message.reply_text(
-            POSTFLOW_1,
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Continue", callback_data="continue_post_1")]])
-        )
-
-    # ========== MUSICIAN BUTTONS ==========
-    # Occupation
-    elif data in ("musician_occ_singer", "musician_occ_engineer", "musician_occ_composer", "musician_occ_arranger"):
+    # ========== DESIGNER BUTTONS ==========
+    # Designer: Occupation (specialization) -- исправленный обработчик!
+    elif data in (
+        "designer_occ_interface",
+        "designer_occ_graphic",
+        "designer_occ_motion",
+        "designer_occ_fashion"
+    ):
         occ_map = {
-            "musician_occ_singer": "Singer",
-            "musician_occ_engineer": "Sound Engineer",
-            "musician_occ_composer": "Composer",
-            "musician_occ_arranger": "Arranger"
+            "designer_occ_interface": "Interface Designer",
+            "designer_occ_graphic": "Graphic Designer",
+            "designer_occ_motion": "Motion Designer",
+            "designer_occ_fashion": "Fashion Designer"
         }
         occupation = occ_map[data]
         await query.message.reply_text(occupation)
-        notion.pages.update(page_id=user_page_id[chat_id], properties={"Occupation": {"select": {"name": occupation}}})
-        context.user_data["state"] = M_INSTRUMENTS
-        await query.message.reply_text(
-            "Do you play any instruments?",
-            reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("Yes", callback_data="musician_instr_yes")],
-                [InlineKeyboardButton("No", callback_data="musician_instr_no")],
-            ])
-        )
-
-    # Instruments
-    elif data in ("musician_instr_yes", "musician_instr_no"):
-        instr = "Yes" if data == "musician_instr_yes" else "No"
-        await query.message.reply_text(instr)
-        notion.pages.update(page_id=user_page_id[chat_id], properties={"Instruments": {"select": {"name": instr}}})
-        context.user_data["state"] = M_INST_CONTEXT
-        await query.message.reply_text("What instruments do you play if you do?\n\nPut - if you are not")
-
-    # Sing
-    elif data in ("musician_sing_yes", "musician_sing_no"):
-        sing = "Yes" if data == "musician_sing_yes" else "No"
-        await query.message.reply_text(sing)
-        notion.pages.update(page_id=user_page_id[chat_id], properties={"Sing": {"select": {"name": sing}}})
-        context.user_data["state"] = M_MIXING
-        await query.message.reply_text(
-            "What is your proficiency in mixing/mastering?",
-            reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("Yes I Am A Professional", callback_data="musician_mix_prof")],
-                [InlineKeyboardButton("Yes I Am An Amateur", callback_data="musician_mix_amateur")],
-                [InlineKeyboardButton("No", callback_data="musician_mix_no")],
-            ])
-        )
-
-    # Mixing
-    elif data in ("musician_mix_prof", "musician_mix_amateur", "musician_mix_no"):
-        mix_map = {
-            "musician_mix_prof": "Yes I Am A Professional",
-            "musician_mix_amateur": "Yes I Am An Amateur",
-            "musician_mix_no": "No"
-        }
-        mixing = mix_map[data]
-        await query.message.reply_text(mixing)
-        notion.pages.update(page_id=user_page_id[chat_id], properties={"Mixing": {"select": {"name": mixing}}})
-        context.user_data["state"] = M_GENRE
-        await query.message.reply_text(
-            "What genre do you identify with?\n\nIf multiple please write them all down"
-        )
-
-    # Collaborations
-    elif data in ("musician_collab_ftf", "musician_collab_online", "musician_collab_unsure"):
-        collab_map = {
-            "musician_collab_ftf": "Face to Face",
-            "musician_collab_online": "Online",
-            "musician_collab_unsure": "I Am Not Sure"
-        }
-        collab = collab_map[data]
-        await query.message.reply_text(collab)
-        notion.pages.update(page_id=user_page_id[chat_id], properties={"Collaborations": {"select": {"name": collab}}})
-        context.user_data["state"] = M_EXPERIENCE
-        await query.message.reply_text("How many years have you been in music industry?")
+        try:
+            notion.pages.update(
+                page_id=user_page_id[chat_id],
+                properties={"Occupation": {"select": {"name": occupation}}}
+            )
+        except Exception as e:
+            await query.message.reply_text(f"Ошибка при обновлении Occupation: {e}")
+        context.user_data["state"] = D_SKILLS
+        await query.message.reply_text("What are your specific skills?")
 
     # ========== POSTFLOW & OTHER ==========
     elif data == "continue_post_1":
