@@ -39,7 +39,7 @@ user_page_id: dict[int, str] = {}
     V_NAME, V_SOCIAL, V_LOCATION, V_ABOUT, V_PLANS,
     # Star states
     S_NAME, S_SOCIAL, S_LOCATION, S_ABOUT, S_PLANS
-) = range(49)
+) = range(44)
 
 # ========== POSTFLOW TEXT ==========
 POSTFLOW_1 = (
