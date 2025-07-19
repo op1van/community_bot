@@ -170,7 +170,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         user_data[chat_id] = {"Telegram": f"@{query.from_user.username}" if query.from_user.username else "", "Type": "Little Star"}
         context.user_data["state"] = S_NAME
         await query.message.reply_text("What is your name?")
-    # ARTIST BUTTONS
     elif data in ("artist_collab_yes", "artist_collab_no"):
         collab = "Yes" if data == "artist_collab_yes" else "No"
         await query.message.reply_text(collab)
@@ -220,7 +219,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             POSTFLOW_1,
             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Continue", callback_data="continue_post_1")]])
         )
-    # DESIGNER BUTTONS
     elif data in ("designer_occ_interface", "designer_occ_graphic", "designer_occ_motion", "designer_occ_fashion"):
         occ_map = {
             "designer_occ_interface": "Interface Designer",
@@ -236,7 +234,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             await query.message.reply_text(f"Ошибка при обновлении Occupation: {e}")
         context.user_data["state"] = D_SKILLS
         await query.message.reply_text("What are your specific skills?")
-    # MUSICIAN BUTTONS
     elif data in ("musician_occ_singer", "musician_occ_engineer", "musician_occ_composer", "musician_occ_arranger"):
         occ_map = {
             "musician_occ_singer": "Singer",
