@@ -46,9 +46,11 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await query.message.reply_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif data == "skip_back":
-        # возвращаемся к предыдущему шагу
-        text = "Hey there, meet cllb — the music community-label that kinda accidentally started itself (but stuck around on purpose)"
-        keyboard = [[InlineKeyboardButton("NICE", callback_data="nice")]]
+        text = "Few questions coming up — but first, read the manifesto. It’s kinda sacred"
+        keyboard = [
+            [InlineKeyboardButton("The Important Doc", callback_data="read_doc")],
+            [InlineKeyboardButton("No Time To Read", callback_data="skip_doc")],
+        ]
         await query.message.reply_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif data == "read_doc":
