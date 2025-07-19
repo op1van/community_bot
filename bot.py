@@ -37,10 +37,12 @@ user_page_id: dict[int, str] = {}
     # Videomaker states
     V_NAME, V_LOCATION, V_OCCUPATION, V_GENRE, V_DEMOS, V_SOCIAL, V_PLANS, V_INSTR_CONTEXT, V_ABOUT,
     # Little Star states
-    LS_NAME, LS_LOCATION, LS_ABOUT, LS_SOCIAL, LS_PLANS
-) = range(48)
+    LS_NAME, LS_LOCATION, LS_ABOUT, LS_SOCIAL, LS_PLANS,
+    # Postflow screens
+    POST_1, POST_2, POST_3, POST_PROMISE, POST_FINAL
+) = range(53)
 
-# ========== POSTFLOW TEXT ==========
+# ========== POSTFLOW TEXTS ==========
 POSTFLOW_1 = (
     "Thank you! Got it!\n\n"
     "Ok, still here awesome just a few things left to share and you are allllmost here vibing with all of us:\n"
@@ -61,6 +63,102 @@ POSTFLOW_1 = (
     "You’re not a stat. A release isn’t a KPI. It’s a time capsule.\n"
     "Self-joy over Pretending to be cooler than you are\n"
     "Cringe is real. So is freedom. We pick freedom."
+)
+
+POSTFLOW_2 = (
+    "What We Believe\n\n"
+    "We’re not chasing formats — we’re chasing goosebumps.\n"
+    "If it doesn’t hit somewhere between your ribs and your third eye? Skip.\n\n"
+    "We’re not here for viral hits (unless they’re accidentally iconic).\n"
+    "We’re here for meaning, memory, and the kind of sound that makes your brain go huh, okay wow.\n\n"
+    "This isn’t a startup pitch.\n"
+    "It’s a bridge — between DIY chaos and pro polish. Between Notes app bars and festival stages. Between “idk if this is anything” and “this changed my week.”\n\n"
+    "We don’t wait for green lights.\n"
+    "We start where we are — busted laptop, cracked plugins, 2AM self-doubt and all.\n"
+    "No permission needed.\n"
+    "Just press go.\n\n"
+    "How we actually operate\n\n"
+    "If a track goes off?\n"
+    "Boom — we spin up a team: mixheads, cover designers, write-y types, promo ninjas.\n"
+    "One post in the chat and suddenly it’s a mini label sprint.\n\n"
+    "There’s no form to apply.\n"
+    "No “why do you want this role” nonsense.\n"
+    "Just vibes and timing.\n"
+    "If it clicks — we’re on.\n\n"
+    "How the cllb crew’s got your back\n\n"
+    "Got an idea? Cool.\n"
+    "Drop it in chat and someone will hop on:\n"
+    "mix your track\n"
+    "sketch a cover\n"
+    "write a lil blurb\n"
+    "pitch it to press\n\n"
+    "We talk in TG, calls, group threads, memes, sometimes IRL.\n"
+    "You don’t have to be loud — just show up and care a little."
+)
+
+POSTFLOW_3 = (
+    "What You Get With cllb\n\n"
+    "If you’re an artist:\n"
+    "• Real support (like actually)\n"
+    "• Feedback that’s not from your mom\n"
+    "• Help with mix, visuals, promo, and gigs\n"
+    "• Space to test, mess up, bounce back\n"
+    "• Digital & physical releases\n"
+    "• Your track on a playlist next to someone famous (maybe)\n\n"
+    "If you’re a creative/human person in the chat:\n"
+    "• Add real stuff to your portfolio (not just client decks)\n"
+    "• Be part of something weird + good\n"
+    "• Launch side quests, join collabs\n"
+    "• Use your skillset to do culture, not just content\n"
+    "• Build trust, not titles\n\n"
+    "If you’re breathing:\n"
+    "• Friends\n"
+    "• Chaos\n"
+    "• Creative fuel\n"
+    "• A stage we’re all building together\n\n"
+    "The core Pokémons aka the cllb team\n\n"
+    "They scout, curate, troubleshoot, build, and occasionally cry in the group chat.\n"
+    "They keep it all moving, connecting dots and people like it’s a Mario Kart shortcut.\n\n"
+    "DM us:\n"
+    "Dasha – [@daria_kraski] – if you got lost\n"
+    "Eugene – [@boysdontexist] – if you've lost your soul/ mind/ purpose\n"
+    "Mila – [@MilaIgnatevaa] – if you've lost the cllb passwords\n"
+    "Emil – [@colasigna] – if you've lost a cool guy from the community comments\n"
+    "Bogdan – [@dolgopolsque] – if you found a great solution on how to make cllb even more visually attractive\n"
+    "Ivan – [@🕳️] – one day he will text you first\n\n"
+    "Final Words\n\n"
+    "We’re not a label.\n"
+    "We’re not an agency.\n"
+    "We’re not chasing virality.\n"
+    "We’re just making things that mean something, with people who care.\n"
+    "You don’t need permission.\n"
+    "You don’t need to be perfect.\n"
+    "You just need to show up."
+)
+
+POSTFLOW_PROMISE = (
+    "Do we have collaba vibe check-in? Yes, we do!\n\n"
+    "1. Be real. name things as it is, don’t shame them.\n"
+    "2. Feedback? Yes. Rudeness? Nope.\n"
+    "3. Burnt out? Say so. We’ll hold it down till you bounce back.\n"
+    "4. Made a promise? Keep it. No pressure, but don’t ghost.\n"
+    "5. Feeling lost or inactive for 2 weeks? You might quietly get dropped from the project. No hard feelings.\n"
+    "6. Talkers ≠ doers. If you’re just chatting but not contributing — you’re chilling, not collabing.\n"
+    "7. No bosses, no minions. But trust? Big yes.\n"
+    "8. No pedestals. We’re all figuring it out — even the OGs.\n"
+    "9. Leaving? All good. Just clean your room before you go.\n"
+    "10. Invite cool people. Protect the vibe.\n"
+    "11. Don’t lurk forever. Speak up. Help out.\n"
+    "12. Fail? Cool. Try again. This is a playground.\n"
+    "13. Start fires (creative ones). Light someone up.\n"
+    "14. No to war, hate, or cultural theft. We don’t work with people who oppress or dehumanise — in any form.\n"
+    "15. Respect the inner circle. Ask before sharing private convos.\n\n"
+    "Bonus track:\n"
+    "If you act on behalf of cllb — remember, you’re repping all of us. So filter the toxicity, and please… no -isms (sexism, racism, ableism, etc). Not our jam."
+)
+
+POSTFLOW_FINAL = (
+    "Looks like you're ready for some fun, huh?"
 )
 
 MANIFESTO = (
@@ -94,6 +192,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     data = query.data
     chat_id = query.from_user.id
 
+    # Start
     if data == "nice":
         await query.message.reply_text(
             "Few questions coming up — but first, read the manifesto. It’s kinda sacred",
@@ -158,6 +257,8 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 [InlineKeyboardButton("My Mom Call Me My Little Star", callback_data="role_star")],
             ])
         )
+
+    # Role selection
     elif data == "role_artist":
         user_data[chat_id] = {"Telegram": f"@{query.from_user.username}" if query.from_user.username else "", "Type": "Artist"}
         context.user_data["state"] = A_NAME
@@ -185,7 +286,45 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         context.user_data["state"] = LS_NAME
         await query.message.reply_text("What is your name?")
     elif data == "continue_post_1":
-        await query.message.reply_text("Welcome to the crew! 🎉")
+        context.user_data["state"] = POST_1
+        await query.message.reply_text(
+            POSTFLOW_2,
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Continue", callback_data="continue_post_2")]])
+        )
+    elif data == "continue_post_2":
+        context.user_data["state"] = POST_2
+        await query.message.reply_text(
+            POSTFLOW_3,
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Continue", callback_data="continue_post_3")]])
+        )
+    elif data == "continue_post_3":
+        context.user_data["state"] = POST_3
+        await query.message.reply_text(
+            "Wanna get noticed? Just show up and do your thing",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("OK OK OK I Promise", callback_data="ok_promise")],
+                [InlineKeyboardButton("Lowkey Just Vibing And Watching", callback_data="just_vibing")]
+            ])
+        )
+    elif data == "just_vibing":
+        await query.message.reply_text(
+            "Oh and hey! See you!",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("Subscribe", url="https://linktree.com/cllllllllllllb")]
+            ])
+        )
+    elif data == "ok_promise":
+        context.user_data["state"] = POST_PROMISE
+        await query.message.reply_text(
+            POSTFLOW_PROMISE,
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("cllb, I Think Love U Already", callback_data="final_love")]])
+        )
+    elif data == "final_love":
+        context.user_data["state"] = POST_FINAL
+        await query.message.reply_text(
+            POSTFLOW_FINAL,
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Join Community", url="https://t.me/+p9m9pRjBvi4xNWMy")]])
+        )
 
     # ARTIST SELECT BUTTONS
     elif data in ("artist_collab_yes", "artist_collab_no"):
