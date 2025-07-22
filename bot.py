@@ -247,7 +247,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         notion.pages.create(
             parent={"database_id": DATABASE_ID},
             properties={
-                "Name": {"title": [{"text": {"content": artist_data[chat_id]["Name"]}]},
+                "Name": {"title": [{"text": {"content": artist_data[chat_id]["Name"]}}]},
                 "Telegram": {"rich_text": [{"text": {"content": artist_data[chat_id]["Telegram"]}}]},
                 "Type": {"select": {"name": artist_data[chat_id]["Type"]}},
                 "Location": {"rich_text": [{"text": {"content": artist_data[chat_id]["Location"]}}]},
