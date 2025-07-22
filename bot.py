@@ -20,6 +20,100 @@ notion = NotionClient(auth=NOTION_TOKEN)
 user_state = {}
 role_data = {}
 
+# Роли, для которых нужен специальный flow
+ROLE_FLOW = {
+    "role_artist": {
+        "type": "Artist",
+        "questions": [
+            "What is your name, dear? \\ Artist name?",
+            "Your location? We will send you an invitation to the local cllb party when it happens",
+            "In a few words tell us about yourself? Are you a songwriter? Or someone from your team is? Do you produce music yourself?  How do you prefer to collaborate with other musicians? Any upcoming releases, projects, or personal  plans? \n\nWe are here for U! So let us to know ⭐️ better 👀",
+            "Any fresh demos to share? Only soundcloud 💅🏿",
+            "Please add the link - your web site \\ bandcamp \\ insta \\ spotify \\ youtube 👀",
+            "Tell a bit about the idea you would like to implement with collaba community? And what do you need to make a dream come true?"
+        ],
+        "fields": ["Name", "Location", "About", "Demo", "Link", "Idea"]
+    },
+    "role_musician": {
+        "type": "Musician",
+        "questions": [
+            "What is your name, dear?",
+            "Your location? We will send you an invitation to the local cllb party when it happens",
+            "In a few words tell us what is your occupation as a musician? \n\nAre you a singer, sound engineer, composer, arranger, songwriter, or perhaps you play some instruments? How do you prefer to collaborate with other musicians? What is your proficiency in mixing/mastering? \n\nWe are here for U! So let us to know ️ better",
+            "Any fresh demos to share? Only soundcloud",
+            "Please add the link to your web site \\ bandcamp \\ insta \\ spotify",
+            "Tell a bit about the idea you would like to implement with collaba community? And what do you need to make a dream come true?"
+        ],
+        "fields": ["Name", "Location", "About", "Demo", "Link", "Idea"]
+    },
+    "role_designer": {
+        "type": "Designer",
+        "questions": [
+            "What is your name, dear?",
+            "Your location? We will send you an invitation to the local cllb party when it happens",
+            "What are your specific skills?  \nWhat programs/softwares and tools do you use?  \nPlease add the link to your portfolio\\ cv \\ web site",
+            "Social networks",
+            "Tell a bit about the idea you would like to implement with collaba community? And what do you need to make a dream come true?"
+        ],
+        "fields": ["Name", "Location", "About", "Link", "Idea"]
+    },
+    "role_videomaker": {
+        "type": "Videomaker",
+        "questions": [
+            "What is your name, dear?",
+            "Your location? We will send you an invitation to the local cllb party when it happens",
+            "What are your specific skills? \nPlease add the link to your portfolio\\ cv \\ web site",
+            "Social networks",
+            "Tell a bit about the idea you would like to implement with collaba community? And what do you need to make a dream come true?"
+        ],
+        "fields": ["Name", "Location", "About", "Link", "Idea"]
+    },
+    "role_manager": {
+        "type": "Manager",
+        "questions": [
+            "What is your name, dear?",
+            "Your location? We will send you an invitation to the local cllb party when it happens",
+            "What are your specific skills? \n\nPlease add the link to your portfolio\\ cv \\ web site",
+            "Social networks 👀",
+            "Tell a bit about the idea you would like to implement with collaba community? And what do you need to make a dream come true?"
+        ],
+        "fields": ["Name", "Location", "About", "Link", "Idea"]
+    },
+    "role_lawyer": {
+        "type": "Lawyer",
+        "questions": [
+            "What is your name, dear?",
+            "Your location? We will send you an invitation to the local cllb party when it happens",
+            "What are your specific skills? \n\nPlease add the link to your portfolio\\ cv \\ web site",
+            "Social networks 👀",
+            "Tell a bit about the idea you would like to implement with collaba community? And what do you need to make a dream come true?"
+        ],
+        "fields": ["Name", "Location", "About", "Link", "Idea"]
+    },
+    "role_smm": {
+        "type": "SMM",
+        "questions": [
+            "What is your name, dear?",
+            "Your location? We will send you an invitation to the local cllb party when it happens",
+            "What are your specific skills? \n\nPlease add the link to your portfolio\\ cv \\ web site",
+            "Social networks 👀",
+            "Tell a bit about the idea you would like to implement with collaba community? And what do you need to make a dream come true?"
+        ],
+        "fields": ["Name", "Location", "About", "Link", "Idea"]
+    },
+    "role_star": {
+        "type": "Little Star",
+        "questions": [
+            "What is your name, dear?",
+            "Your location? We will send you an invitation to the local cllb party when it happens",
+            "What are your specific skills? \nPlease add the link to your portfolio\\ cv \\ web site. \nOr what kind of star are U?",
+            "Social networks",
+            "Tell a bit about the idea you would like to implement with collaba community? And what do you need to make a dream come true?"
+        ],
+        "fields": ["Name", "Location", "About", "Link", "Idea"]
+    }
+}
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     text = (
         "Hey there, meet cllb — the music community label that kinda accidentally started itself but stuck around on purpose 🧢"
@@ -109,14 +203,14 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 [InlineKeyboardButton("my mom calls me my little star", callback_data="role_star")],
             ])
         )
-    # Manager, Lawyer, SMM scenario
-    elif data in ["role_manager", "role_lawyer", "role_smm"]:
-        role_type = {"role_manager": "Manager", "role_lawyer": "Lawyer", "role_smm": "SMM"}[data]
+    # Flow for all roles
+    elif data in ROLE_FLOW:
+        role_type = ROLE_FLOW[data]["type"]
         role_data[chat_id] = {"Type": role_type}
-        user_state[chat_id] = "role_name"
-        await query.message.reply_text("What is your name, dear?")
-    # After final thank you for all roles
+        user_state[chat_id] = {"flow_key": data, "step": 0}
+        await query.message.reply_text(ROLE_FLOW[data]["questions"][0])
     elif data == "ok":
+        # After final step, show vibe check-in screen
         vibe_text = (
             "<b>Do we have collaba vibe check-in? Yes, we do!</b>\n\n"
             "1. Be real. name things as it is, don’t shame them.\n"
@@ -207,53 +301,51 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     state = user_state.get(chat_id)
     telegram_username = f"@{update.effective_user.username}" if update.effective_user.username else ""
 
-    # Manager, Lawyer, SMM flow
-    if state == "role_name":
-        role_data[chat_id]["Name"] = text
-        role_data[chat_id]["Telegram"] = telegram_username
-        user_state[chat_id] = "role_location"
-        await update.message.reply_text(
-            "Your location? We will send you an invitation to the local cllb party when it happens"
-        )
-    elif state == "role_location":
-        role_data[chat_id]["Location"] = text
-        user_state[chat_id] = "role_about"
-        await update.message.reply_text(
-            "What are your specific skills?\n\nPlease add the link to your portfolio\\ cv \\ web site"
-        )
-    elif state == "role_about":
-        role_data[chat_id]["About"] = text
-        user_state[chat_id] = "role_link"
-        await update.message.reply_text("Social networks 👀")
-    elif state == "role_link":
-        role_data[chat_id]["Link"] = text
-        user_state[chat_id] = "role_idea"
-        await update.message.reply_text("Tell a bit about the idea you would like to implement with collaba community? And what do you need to make a dream come true?")
-    elif state == "role_idea":
-        role_data[chat_id]["Idea"] = text
-        # Save to Notion
-        try:
-            notion.pages.create(
-                parent={"database_id": DATABASE_ID},
-                properties={
-                    "Name": {"title": [{"text": {"content": role_data[chat_id]["Name"]}}]},
-                    "Type": {"rich_text": [{"text": {"content": role_data[chat_id]["Type"]}}]},
-                    "Telegram": {"rich_text": [{"text": {"content": role_data[chat_id]["Telegram"]}}]},
-                    "Location": {"rich_text": [{"text": {"content": role_data[chat_id]["Location"]}}]},
-                    "About": {"rich_text": [{"text": {"content": role_data[chat_id]["About"]}}]},
-                    "Link": {"rich_text": [{"text": {"content": role_data[chat_id]["Link"]}}]},
-                    "Idea": {"rich_text": [{"text": {"content": role_data[chat_id]["Idea"]}}]},
-                }
+    # Flow for all roles in ROLE_FLOW
+    if isinstance(state, dict) and "flow_key" in state:
+        flow_key = state["flow_key"]
+        step = state["step"]
+        flow = ROLE_FLOW[flow_key]
+        fields = flow["fields"]
+        questions = flow["questions"]
+
+        # Сохраняем ответ на текущий шаг
+        if step == 0:
+            role_data[chat_id]["Name"] = text
+            role_data[chat_id]["Telegram"] = telegram_username
+        elif step > 0 and step < len(fields):
+            role_data[chat_id][fields[step]] = text
+
+        # Следующий вопрос или запись в Notion
+        if step + 1 < len(fields):
+            user_state[chat_id]["step"] += 1
+            await update.message.reply_text(questions[step + 1])
+        else:
+            # Запись в Notion
+            notion_payload = {
+                "Name": {"title": [{"text": {"content": role_data[chat_id].get("Name", "")}}]},
+                "Type": {"rich_text": [{"text": {"content": role_data[chat_id].get("Type", flow["type"])}}]},
+                "Telegram": {"rich_text": [{"text": {"content": role_data[chat_id].get("Telegram", telegram_username)}}]},
+            }
+            # Добавляем остальные поля (rich_text)
+            for f in fields[1:]:
+                notion_payload[f] = {"rich_text": [{"text": {"content": role_data[chat_id].get(f, "")}}]}
+
+            try:
+                notion.pages.create(
+                    parent={"database_id": DATABASE_ID},
+                    properties=notion_payload
+                )
+            except Exception as e:
+                await update.message.reply_text(f"Не удалось записать в Notion: {e}")
+
+            user_state[chat_id] = "final_thankyou"
+            await update.message.reply_text(
+                "Thank you! Got it!\n\nJust a few things left to share and you are allllmost here vibing with all of us 💿🥵",
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton("ok", callback_data="ok")]
+                ])
             )
-        except Exception as e:
-            await update.message.reply_text(f"Не удалось записать в Notion: {e}")
-        user_state[chat_id] = "final_thankyou"
-        await update.message.reply_text(
-            "Thank you! Got it!\n\nJust a few things left to share and you are allllmost here vibing with all of us 💿🥵",
-            reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("ok", callback_data="ok")]
-            ])
-        )
 
 def main() -> None:
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
