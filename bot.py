@@ -125,7 +125,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
                 parent={"database_id": DATABASE_ID},
                 properties={
                     "Name": {"title": [{"text": {"content": text}}]},
-                    "Type": {"select": {"name": "Artist"}},
+                    "Type": {"rich_text": [{"text": {"content": "Artist"}}]},
                     "Telegram": {"rich_text": [{"text": {"content": telegram_username}}]},
                 }
             )
