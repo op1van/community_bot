@@ -20,6 +20,11 @@ notion = NotionClient(auth=NOTION_TOKEN)
 user_state = {}
 artist_data = {}
 
+# Список правильных ключей из вашей Notion базы. Обновить, если что-то меняется!
+NOTION_KEYS = [
+    "Name", "Telegram", "Type", "Location", "About", "Demos", "Link", "Idea"
+]
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     text = (
         "Hey there, meet cllb — the music community label that kinda accidentally started itself but stuck around on purpose 🧢"
@@ -96,6 +101,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             ])
         )
     elif data == "start_intro":
+        # Все варианты с маленькой буквы!
         await query.message.reply_text(
             "who are you?",
             reply_markup=InlineKeyboardMarkup([
@@ -113,7 +119,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         user_state[chat_id] = "artist_name"
         artist_data[chat_id] = {
             "Telegram": f"@{query.from_user.username}" if query.from_user.username else "",
-            "Type": "Artist"
+            "Type": "artist"  # значение для select! (должно совпадать с опцией в базе Notion)
         }
         await query.message.reply_text("What is your name, dear? \\ Artist name?")
     elif data == "artist_finish":
@@ -232,7 +238,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         user_state[chat_id] = "artist_demo"
         await update.message.reply_text("Any fresh demos to share? Only soundcloud 💅🏿")
     elif state == "artist_demo":
-        artist_data[chat_id]["Demo"] = text
+        artist_data[chat_id]["Demos"] = text  # поле Demos! (обнови имя если нужно)
         user_state[chat_id] = "artist_link"
         await update.message.reply_text("Please add the link - your web site \\ bandcamp \\ insta \\ spotify \\ youtube 👀")
     elif state == "artist_link":
@@ -243,20 +249,29 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         )
     elif state == "artist_idea":
         artist_data[chat_id]["Idea"] = text
-        # Save to Notion
+        # Сохраняем в Notion
         try:
+            # Собираем только существующие поля
+            properties = {}
+            if "Name" in artist_data[chat_id]:
+                properties["Name"] = {"title": [{"text": {"content": artist_data[chat_id]["Name"]}}]}
+            if "Telegram" in artist_data[chat_id]:
+                properties["Telegram"] = {"rich_text": [{"text": {"content": artist_data[chat_id]["Telegram"]}}]}
+            if "Type" in artist_data[chat_id]:
+                properties["Type"] = {"select": {"name": artist_data[chat_id]["Type"]}}
+            if "Location" in artist_data[chat_id]:
+                properties["Location"] = {"rich_text": [{"text": {"content": artist_data[chat_id]["Location"]}}]}
+            if "About" in artist_data[chat_id]:
+                properties["About"] = {"rich_text": [{"text": {"content": artist_data[chat_id]["About"]}}]}
+            if "Demos" in artist_data[chat_id]:  # имя поля должно совпадать с базой!
+                properties["Demos"] = {"rich_text": [{"text": {"content": artist_data[chat_id]["Demos"]}}]}
+            if "Link" in artist_data[chat_id]:
+                properties["Link"] = {"rich_text": [{"text": {"content": artist_data[chat_id]["Link"]}}]}
+            if "Idea" in artist_data[chat_id]:
+                properties["Idea"] = {"rich_text": [{"text": {"content": artist_data[chat_id]["Idea"]}}]}
             notion.pages.create(
                 parent={"database_id": DATABASE_ID},
-                properties={
-                    "Name": {"title": [{"text": {"content": artist_data[chat_id]["Name"]}}]},
-                    "Telegram": {"rich_text": [{"text": {"content": artist_data[chat_id]["Telegram"]}}]},
-                    "Type": {"select": {"name": artist_data[chat_id]["Type"]}},
-                    "Location": {"rich_text": [{"text": {"content": artist_data[chat_id]["Location"]}}]},
-                    "About": {"rich_text": [{"text": {"content": artist_data[chat_id]["About"]}}]},
-                    "Demo": {"rich_text": [{"text": {"content": artist_data[chat_id]["Demo"]}}]},
-                    "Link": {"rich_text": [{"text": {"content": artist_data[chat_id]["Link"]}}]},
-                    "Idea": {"rich_text": [{"text": {"content": artist_data[chat_id]["Idea"]}}]},
-                }
+                properties=properties
             )
             await update.message.reply_text(
                 "Thank you! Got it!\n\njust a few things left to share and you are allllmost here vibing with all of us 💿🥵",
