@@ -1,8 +1,8 @@
 import os
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
-    ApplicationBuilder, CommandHandler, CallbackQueryHandler,
-    ContextTypes
+    ApplicationBuilder, CommandHandler, CallbackQueryHandler, MessageHandler,
+    filters, ContextTypes
 )
 from notion_client import Client as NotionClient
 
@@ -17,6 +17,9 @@ if not (NOTION_TOKEN and DATABASE_ID):
 
 notion = NotionClient(auth=NOTION_TOKEN)
 
+user_state = {}
+artist_data = {}
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     text = (
         "Hey there, meet cllb — the music community label that kinda accidentally started itself but stuck around on purpose 🧢"
@@ -28,6 +31,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     query = update.callback_query
     await query.answer()
     data = query.data
+    chat_id = query.from_user.id
 
     if data == "nice":
         await query.message.reply_text(
@@ -65,15 +69,207 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             [InlineKeyboardButton("not my vibe, sorry folks", callback_data="vibe_no")]
         ]
         await query.message.reply_text(manifesto, parse_mode="HTML", reply_markup=InlineKeyboardMarkup(keyboard))
-    elif data == "vibe_yes":
-        await query.message.reply_text("Next step coming soon…")
     elif data == "vibe_no":
-        await query.message.reply_text("No worries! See you around.")
+        await query.message.reply_text(
+            "😒",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("than subscribe", url="https://linktr.ee/cllllllllllllb")]
+            ])
+        )
+    elif data == "vibe_yes":
+        await query.message.reply_text(
+            "Alrighty, have we crossed paths before?  Your turn 👀",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("10 mins to intro, but consent first", callback_data="consent_start")]
+            ])
+        )
+    elif data == "consent_start":
+        consent_text = (
+            "<b>Consent *</b>\n\n"
+            "By submitting this \"form\" you consent to the collection and processing of your personal data for the purpose of assembling a professional team. "
+            "Your data may be transferred and stored outside your country of residence.  You can withdraw your consent at any time by letting @MilaIgnatevaa know. \n\n"
+            "<a href='https://drive.google.com/file/d/1euqwTrqdoG2-9ySB9JivXdTT3Tb_R5sG/view'>I have read and agree to the Privacy Policy and Cookie Policy 🥸</a>"
+        )
+        await query.message.reply_text(consent_text, parse_mode="HTML",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("10 mins to intro", callback_data="start_intro")]
+            ])
+        )
+    elif data == "start_intro":
+        await query.message.reply_text(
+            "Who are you?",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("Artist", callback_data="role_artist")],
+                [InlineKeyboardButton("Musician", callback_data="role_musician")],
+                [InlineKeyboardButton("Designer", callback_data="role_designer")],
+                [InlineKeyboardButton("Videomaker", callback_data="role_videomaker")],
+                [InlineKeyboardButton("Manager", callback_data="role_manager")],
+                [InlineKeyboardButton("Lawyer", callback_data="role_lawyer")],
+                [InlineKeyboardButton("SMM", callback_data="role_smm")],
+                [InlineKeyboardButton("My mom calls me My little star", callback_data="role_star")],
+            ])
+        )
+    elif data == "role_artist":
+        user_state[chat_id] = "artist_name"
+        artist_data[chat_id] = {
+            "Telegram": f"@{query.from_user.username}" if query.from_user.username else "",
+            "Type": "Artist"
+        }
+        await query.message.reply_text("What is your name, dear? \\ Artist name?")
+    elif data == "artist_finish":
+        await query.message.reply_text(
+            "Thank you! Got it!\n\njust a few things left to share and you are allllmost here vibing with all of us 💿🥵",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("OK", callback_data="ok_vibecheck")]
+            ])
+        )
+    elif data == "ok_vibecheck":
+        vibe_text = (
+            "<b>Do we have collaba vibe check-in? Yes, we do!</b>\n\n"
+            "1. Be real. name things as it is, don’t shame them.\n"
+            "2. Feedback? Yes. Rudeness? Nope.\n"
+            "3. Burnt out? Say so. We’ll hold it down till you bounce back.\n"
+            "4. Made a promise? Keep it. No pressure, but don’t ghost.\n"
+            "5. Feeling lost or inactive for 2 weeks? You might quietly get dropped from the project. No hard feelings.\n"
+            "6. Talkers ≠ doers. If you’re just chatting but not contributing — you’re chilling, not collabing.\n"
+            "7. No bosses, no minions. But trust? Big yes.\n"
+            "8. No pedestals. We’re all figuring it out — even the OGs.\n"
+            "9. Leaving? All good. Just clean your room before you go.\n"
+            "10. Invite cool people. Protect the vibe.\n"
+            "11. Don’t lurk forever. Speak up. Help out.\n"
+            "12. Fail? Cool. Try again. This is a playground.\n"
+            "13. Start fires (creative ones). Light someone up.\n"
+            "14. No to war, hate, or cultural theft. We don’t work with people who oppress or dehumanise — in any form.\n"
+            "15. Respect the inner circle. Ask before sharing private convos.\n\n"
+            "<blockquote>Bonus track:\nIf you act on behalf of cllb — remember, you’re repping all of us. So filter the toxicity, and please… no -isms (sexism, racism, ableism, etc). Not our jam.</blockquote>"
+        )
+        await query.message.reply_text(vibe_text, parse_mode="HTML", reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("collaba, suppose I'm already сrushed on", callback_data="already_crushed")]
+        ]))
+    elif data == "already_crushed":
+        what_you_get = (
+            "<b>What you get with cllb</b>\n\n"
+            "<b><i>If you’re an artist:</i></b>\n"
+            "• Real support (like actually)\n"
+            "• Feedback that’s not from your mom\n"
+            "• Help with mix, visuals, promo, and gigs\n"
+            "• Space to test, mess up, bounce back\n"
+            "• Digital & physical releases\n"
+            "• Your track on a playlist next to someone famous (maybe)\n\n"
+            "<b><i>If you’re a creative/human person in the chat:</i></b>\n"
+            "• Add real stuff to your portfolio (not just client decks)\n"
+            "• Be part of something weird + good\n"
+            "• Launch side quests, join collabs\n"
+            "• Use your skillset to do culture, not just content\n"
+            "• Build trust, not titles\n\n"
+            "<b><i>If you’re breathing:</i></b>\n"
+            "• Friends\n"
+            "• Chaos\n"
+            "• Creative fuel\n"
+            "• A stage we’re all building together"
+        )
+        await query.message.reply_text(what_you_get, parse_mode="HTML", reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("continue", callback_data="ask_dm")]
+        ]))
+    elif data == "ask_dm":
+        dm_block = (
+            "<b>Do you have a question? Ask them</b>\n\n"
+            "They scout, curate, troubleshoot, build, and occasionally cry in the group chat. They keep it all moving, connecting dots and people like it’s a Mario Kart shortcut.\n\n"
+            "DM:\n"
+            "Dasha – [@daria_kraski] – if you got lost\n"
+            "Eugene – [@boysdontexist] – if you've lost your soul/ mind/ purpose\n"
+            "Mila – [@MilaIgnatevaa] – if you've lost the cllb passwords\n"
+            "Emil – [@colasigna] – if you've lost a cool guy from the community comments\n"
+            "Bogdan – [@dolgopolsque] – if you found a great solution on how to make cllb even more visually attractive\n"
+            "Ivan – [@🕳️] – one day he will text you first\n"
+        )
+        await query.message.reply_text(dm_block, parse_mode="HTML", reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("continue", callback_data="showup")]
+        ]))
+    elif data == "showup":
+        await query.message.reply_text(
+            "Wanna get noticed? Just show up and do your thing",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("OK OK OK I promise", callback_data="fun_ready")],
+                [InlineKeyboardButton("lowkey just vibing and watching", callback_data="just_vibing")]
+            ])
+        )
+    elif data == "just_vibing":
+        await query.message.reply_text(
+            "😒",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("than subscribe", url="https://linktr.ee/cllllllllllllb")]
+            ])
+        )
+    elif data == "fun_ready":
+        await query.message.reply_text(
+            "Looks like you're ready for some fun, huh?",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("join community", url="https://t.me/+p9m9pRjBvi4xNWMy")]
+            ])
+        )
+
+async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    chat_id = update.effective_user.id
+    text = update.message.text.strip()
+    state = user_state.get(chat_id)
+
+    # Artist flow
+    if state == "artist_name":
+        artist_data[chat_id]["Name"] = text
+        user_state[chat_id] = "artist_location"
+        await update.message.reply_text("Your location? We will send you an invitation to the local cllb party when it happens")
+    elif state == "artist_location":
+        artist_data[chat_id]["Location"] = text
+        user_state[chat_id] = "artist_about"
+        await update.message.reply_text(
+            "In a few words tell us about yourself? Are you a songwriter? Or someone from your team is? "
+            "Do you produce music yourself? How do you prefer to collaborate with other musicians? Any upcoming releases, projects, or personal plans? \n\n"
+            "We are here for U! So let us to know ⭐️ better 👀"
+        )
+    elif state == "artist_about":
+        artist_data[chat_id]["About"] = text
+        user_state[chat_id] = "artist_demo"
+        await update.message.reply_text("Any fresh demos to share? Only soundcloud 💅🏿")
+    elif state == "artist_demo":
+        artist_data[chat_id]["Demo"] = text
+        user_state[chat_id] = "artist_link"
+        await update.message.reply_text("Please add the link - your web site \\ bandcamp \\ insta \\ spotify \\ youtube 👀")
+    elif state == "artist_link":
+        artist_data[chat_id]["Link"] = text
+        user_state[chat_id] = "artist_idea"
+        await update.message.reply_text(
+            "Tell a bit about the idea you would like to implement with collaba community? And what do you need to make a dream come true?"
+        )
+    elif state == "artist_idea":
+        artist_data[chat_id]["Idea"] = text
+        # Save to Notion
+        notion.pages.create(
+            parent={"database_id": DATABASE_ID},
+            properties={
+                "Name": {"title": [{"text": {"content": artist_data[chat_id]["Name"]}]},
+                "Telegram": {"rich_text": [{"text": {"content": artist_data[chat_id]["Telegram"]}}]},
+                "Type": {"select": {"name": artist_data[chat_id]["Type"]}},
+                "Location": {"rich_text": [{"text": {"content": artist_data[chat_id]["Location"]}}]},
+                "About": {"rich_text": [{"text": {"content": artist_data[chat_id]["About"]}}]},
+                "Demo": {"rich_text": [{"text": {"content": artist_data[chat_id]["Demo"]}}]},
+                "Link": {"rich_text": [{"text": {"content": artist_data[chat_id]["Link"]}}]},
+                "Idea": {"rich_text": [{"text": {"content": artist_data[chat_id]["Idea"]}}]},
+            }
+        )
+        user_state[chat_id] = None
+        await update.message.reply_text(
+            "Thank you! Got it!\n\njust a few things left to share and you are allllmost here vibing with all of us 💿🥵",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("OK", callback_data="ok_vibecheck")]
+            ])
+        )
 
 def main() -> None:
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(button_handler))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     app.run_polling()
 
 if __name__ == "__main__":
