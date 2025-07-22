@@ -97,16 +97,16 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         )
     elif data == "start_intro":
         await query.message.reply_text(
-            "Who are you?",
+            "who are you?",
             reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("Artist", callback_data="role_artist")],
-                [InlineKeyboardButton("Musician", callback_data="role_musician")],
-                [InlineKeyboardButton("Designer", callback_data="role_designer")],
-                [InlineKeyboardButton("Videomaker", callback_data="role_videomaker")],
-                [InlineKeyboardButton("Manager", callback_data="role_manager")],
-                [InlineKeyboardButton("Lawyer", callback_data="role_lawyer")],
-                [InlineKeyboardButton("SMM", callback_data="role_smm")],
-                [InlineKeyboardButton("My mom calls me My little star", callback_data="role_star")],
+                [InlineKeyboardButton("artist", callback_data="role_artist")],
+                [InlineKeyboardButton("musician", callback_data="role_musician")],
+                [InlineKeyboardButton("designer", callback_data="role_designer")],
+                [InlineKeyboardButton("videomaker", callback_data="role_videomaker")],
+                [InlineKeyboardButton("manager", callback_data="role_manager")],
+                [InlineKeyboardButton("lawyer", callback_data="role_lawyer")],
+                [InlineKeyboardButton("smm", callback_data="role_smm")],
+                [InlineKeyboardButton("my mom calls me my little star", callback_data="role_star")],
             ])
         )
     elif data == "role_artist":
@@ -244,26 +244,29 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     elif state == "artist_idea":
         artist_data[chat_id]["Idea"] = text
         # Save to Notion
-        notion.pages.create(
-            parent={"database_id": DATABASE_ID},
-            properties={
-                "Name": {"title": [{"text": {"content": artist_data[chat_id]["Name"]}}]},
-                "Telegram": {"rich_text": [{"text": {"content": artist_data[chat_id]["Telegram"]}}]},
-                "Type": {"select": {"name": artist_data[chat_id]["Type"]}},
-                "Location": {"rich_text": [{"text": {"content": artist_data[chat_id]["Location"]}}]},
-                "About": {"rich_text": [{"text": {"content": artist_data[chat_id]["About"]}}]},
-                "Demo": {"rich_text": [{"text": {"content": artist_data[chat_id]["Demo"]}}]},
-                "Link": {"rich_text": [{"text": {"content": artist_data[chat_id]["Link"]}}]},
-                "Idea": {"rich_text": [{"text": {"content": artist_data[chat_id]["Idea"]}}]},
-            }
-        )
+        try:
+            notion.pages.create(
+                parent={"database_id": DATABASE_ID},
+                properties={
+                    "Name": {"title": [{"text": {"content": artist_data[chat_id]["Name"]}}]},
+                    "Telegram": {"rich_text": [{"text": {"content": artist_data[chat_id]["Telegram"]}}]},
+                    "Type": {"select": {"name": artist_data[chat_id]["Type"]}},
+                    "Location": {"rich_text": [{"text": {"content": artist_data[chat_id]["Location"]}}]},
+                    "About": {"rich_text": [{"text": {"content": artist_data[chat_id]["About"]}}]},
+                    "Demo": {"rich_text": [{"text": {"content": artist_data[chat_id]["Demo"]}}]},
+                    "Link": {"rich_text": [{"text": {"content": artist_data[chat_id]["Link"]}}]},
+                    "Idea": {"rich_text": [{"text": {"content": artist_data[chat_id]["Idea"]}}]},
+                }
+            )
+            await update.message.reply_text(
+                "Thank you! Got it!\n\njust a few things left to share and you are allllmost here vibing with all of us 💿🥵",
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton("OK", callback_data="ok_vibecheck")]
+                ])
+            )
+        except Exception as e:
+            await update.message.reply_text(f"Не удалось записать ответы в Notion: {e}")
         user_state[chat_id] = None
-        await update.message.reply_text(
-            "Thank you! Got it!\n\njust a few things left to share and you are allllmost here vibing with all of us 💿🥵",
-            reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("OK", callback_data="ok_vibecheck")]
-            ])
-        )
 
 def main() -> None:
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
