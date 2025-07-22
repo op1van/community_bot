@@ -18,7 +18,7 @@ if not (NOTION_TOKEN and DATABASE_ID):
 notion = NotionClient(auth=NOTION_TOKEN)
 
 user_state = {}
-artist_data = {}
+role_data = {}
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     text = (
@@ -109,12 +109,14 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 [InlineKeyboardButton("my mom calls me my little star", callback_data="role_star")],
             ])
         )
-    elif data == "role_artist":
-        artist_data[chat_id] = {}
-        user_state[chat_id] = "ask_name"
-        await query.message.reply_text("What is your name, dear? \\ Artist name?")
+    # Manager, Lawyer, SMM scenario
+    elif data in ["role_manager", "role_lawyer", "role_smm"]:
+        role_type = {"role_manager": "Manager", "role_lawyer": "Lawyer", "role_smm": "SMM"}[data]
+        role_data[chat_id] = {"Type": role_type}
+        user_state[chat_id] = "role_name"
+        await query.message.reply_text("What is your name, dear?")
+    # After final thank you for all roles
     elif data == "ok":
-        # After final step, show vibe check-in
         vibe_text = (
             "<b>Do we have collaba vibe check-in? Yes, we do!</b>\n\n"
             "1. Be real. name things as it is, don’t shame them.\n"
@@ -205,50 +207,42 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     state = user_state.get(chat_id)
     telegram_username = f"@{update.effective_user.username}" if update.effective_user.username else ""
 
-    # Сценарий для Artist
-    if state == "ask_name":
-        artist_data[chat_id] = {
-            "Name": text,
-            "Type": "Artist",
-            "Telegram": telegram_username,
-        }
-        user_state[chat_id] = "ask_location"
+    # Manager, Lawyer, SMM flow
+    if state == "role_name":
+        role_data[chat_id]["Name"] = text
+        role_data[chat_id]["Telegram"] = telegram_username
+        user_state[chat_id] = "role_location"
         await update.message.reply_text(
             "Your location? We will send you an invitation to the local cllb party when it happens"
         )
-    elif state == "ask_location":
-        artist_data[chat_id]["Location"] = text
-        user_state[chat_id] = "ask_about"
+    elif state == "role_location":
+        role_data[chat_id]["Location"] = text
+        user_state[chat_id] = "role_about"
         await update.message.reply_text(
-            "In a few words tell us about yourself? Are you a songwriter? Or someone from your team is? Do you produce music yourself?  How do you prefer to collaborate with other musicians? Any upcoming releases, projects, or personal  plans? \n\nWe are here for U! So let us to know ⭐️ better 👀"
+            "What are your specific skills?\n\nPlease add the link to your portfolio\\ cv \\ web site"
         )
-    elif state == "ask_about":
-        artist_data[chat_id]["About"] = text
-        user_state[chat_id] = "ask_demo"
-        await update.message.reply_text("Any fresh demos to share? Only soundcloud 💅🏿")
-    elif state == "ask_demo":
-        artist_data[chat_id]["Demo"] = text
-        user_state[chat_id] = "ask_link"
-        await update.message.reply_text("Please add the link - your web site \\ bandcamp \\ insta \\ spotify \\ youtube 👀")
-    elif state == "ask_link":
-        artist_data[chat_id]["Link"] = text
-        user_state[chat_id] = "ask_idea"
+    elif state == "role_about":
+        role_data[chat_id]["About"] = text
+        user_state[chat_id] = "role_link"
+        await update.message.reply_text("Social networks 👀")
+    elif state == "role_link":
+        role_data[chat_id]["Link"] = text
+        user_state[chat_id] = "role_idea"
         await update.message.reply_text("Tell a bit about the idea you would like to implement with collaba community? And what do you need to make a dream come true?")
-    elif state == "ask_idea":
-        artist_data[chat_id]["Idea"] = text
-        # Сохраняем в Notion
+    elif state == "role_idea":
+        role_data[chat_id]["Idea"] = text
+        # Save to Notion
         try:
             notion.pages.create(
                 parent={"database_id": DATABASE_ID},
                 properties={
-                    "Name": {"title": [{"text": {"content": artist_data[chat_id]["Name"]}}]},
-                    "Type": {"rich_text": [{"text": {"content": artist_data[chat_id]["Type"]}}]},
-                    "Telegram": {"rich_text": [{"text": {"content": artist_data[chat_id]["Telegram"]}}]},
-                    "Location": {"rich_text": [{"text": {"content": artist_data[chat_id]["Location"]}}]},
-                    "About": {"rich_text": [{"text": {"content": artist_data[chat_id]["About"]}}]},
-                    "Demo": {"rich_text": [{"text": {"content": artist_data[chat_id]["Demo"]}}]},
-                    "Link": {"rich_text": [{"text": {"content": artist_data[chat_id]["Link"]}}]},
-                    "Idea": {"rich_text": [{"text": {"content": artist_data[chat_id]["Idea"]}}]},
+                    "Name": {"title": [{"text": {"content": role_data[chat_id]["Name"]}}]},
+                    "Type": {"rich_text": [{"text": {"content": role_data[chat_id]["Type"]}}]},
+                    "Telegram": {"rich_text": [{"text": {"content": role_data[chat_id]["Telegram"]}}]},
+                    "Location": {"rich_text": [{"text": {"content": role_data[chat_id]["Location"]}}]},
+                    "About": {"rich_text": [{"text": {"content": role_data[chat_id]["About"]}}]},
+                    "Link": {"rich_text": [{"text": {"content": role_data[chat_id]["Link"]}}]},
+                    "Idea": {"rich_text": [{"text": {"content": role_data[chat_id]["Idea"]}}]},
                 }
             )
         except Exception as e:
