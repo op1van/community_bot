@@ -1,13 +1,23 @@
 import os
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
-    ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
+    ApplicationBuilder, CommandHandler, CallbackQueryHandler, MessageHandler,
+    filters, ContextTypes
 )
+from notion_client import Client as NotionClient
 
 TELEGRAM_TOKEN = os.getenv("BOT_TOKEN")
+NOTION_TOKEN = os.getenv("NOTION_TOKEN")
+DATABASE_ID = os.getenv("NOTION_DATABASE_ID")
 
 if not TELEGRAM_TOKEN:
     raise RuntimeError("BOT_TOKEN env var is missing")
+if not (NOTION_TOKEN and DATABASE_ID):
+    raise RuntimeError("Notion env vars are missing")
+
+notion = NotionClient(auth=NOTION_TOKEN)
+
+user_state = {}
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     text = (
@@ -20,6 +30,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     query = update.callback_query
     await query.answer()
     data = query.data
+    chat_id = query.from_user.id
 
     if data == "nice":
         await query.message.reply_text(
@@ -97,11 +108,39 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 [InlineKeyboardButton("my mom calls me my little star", callback_data="role_star")],
             ])
         )
+    elif data == "role_artist":
+        user_state[chat_id] = "ask_name"
+        await query.message.reply_text("What is your name, dear? \\ Artist name?")
+
+async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    chat_id = update.effective_user.id
+    text = update.message.text.strip()
+    state = user_state.get(chat_id)
+    telegram_username = f"@{update.effective_user.username}" if update.effective_user.username else ""
+
+    if state == "ask_name":
+        # Сохраняем в Notion
+        try:
+            notion.pages.create(
+                parent={"database_id": DATABASE_ID},
+                properties={
+                    "Name": {"title": [{"text": {"content": text}}]},
+                    "Type": {"select": {"name": "Artist"}},
+                    "Telegram": {"rich_text": [{"text": {"content": telegram_username}}]},
+                }
+            )
+        except Exception as e:
+            await update.message.reply_text(f"Не удалось записать в Notion: {e}")
+        user_state[chat_id] = "ask_location"
+        await update.message.reply_text(
+            "Your location? We will send you an invitation to the local cllb party when it happens"
+        )
 
 def main() -> None:
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(button_handler))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     app.run_polling()
 
 if __name__ == "__main__":
