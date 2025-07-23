@@ -20,7 +20,6 @@ notion = NotionClient(auth=NOTION_TOKEN)
 user_state = {}
 role_data = {}
 
-# Роли, для которых нужен специальный flow
 ROLE_FLOW = {
     "role_artist": {
         "type": "Artist",
@@ -167,7 +166,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await query.message.reply_text(
             "😒",
             reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("than subscribe", url="https://linktr.ee/cllllllllllllb")]
+                [InlineKeyboardButton("then subscribe", url="https://linktr.ee/cllllllllllllb")]
             ])
         )
     elif data == "vibe_yes":
@@ -264,10 +263,11 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             "They scout, curate, troubleshoot, build, and occasionally cry in the group chat. They keep it all moving, connecting dots and people like it’s a Mario Kart shortcut.\n\n"
             "DM:\n"
             "Dasha – [@daria_kraski] – if you got lost\n"
-            "Eugene – [@boysdontexist] – if you've lost your soul/ mind/ purpose\n"
+            "Eugene – [@boysdontexist] – if you've lost your soul / mind / purpose\n"
             "Mila – [@MilaIgnatevaa] – if you've lost the cllb passwords\n"
             "Emil – [@colasigna] – if you've lost a cool guy from the community comments\n"
-            "Ivan – [@🕳️] – one day he will text you first\n"
+            "Bogdan – [@dolgopolsque] – if you found a great solution on how to make cllb even more visually attractive\n"
+            "Ivan – [@🕳️] – one day he will text you first"
         )
         await query.message.reply_text(dm_block, parse_mode="HTML", reply_markup=InlineKeyboardMarkup([
             [InlineKeyboardButton("continue", callback_data="showup")]
@@ -284,7 +284,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await query.message.reply_text(
             "😒",
             reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("than subscribe", url="https://linktr.ee/cllllllllllllb")]
+                [InlineKeyboardButton("then subscribe", url="https://linktr.ee/cllllllllllllb")]
             ])
         )
     elif data == "fun_ready":
