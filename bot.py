@@ -100,8 +100,8 @@ ROLE_FLOW = {
         ],
         "fields": ["Name", "Location", "About", "Link", "Idea"]
     },
-    "role_sonok": {  # New Сынок role, identical to SMM but Type is "Сынок"
-        "type": "Сынок",
+    "role_other": {  # "other" as per latest instructions
+        "type": "Other",
         "questions": [
             "What is your name, dear?",
             "Your location? We will send you an invitation to the local cllb party when it happens",
@@ -210,18 +210,16 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 [InlineKeyboardButton("manager", callback_data="role_manager")],
                 [InlineKeyboardButton("lawyer", callback_data="role_lawyer")],
                 [InlineKeyboardButton("smm", callback_data="role_smm")],
-                [InlineKeyboardButton("сынок", callback_data="role_sonok")],
+                [InlineKeyboardButton("other", callback_data="role_other")],
                 [InlineKeyboardButton("my mom calls me my little star", callback_data="role_star")],
             ])
         )
-    # Flow for all roles
     elif data in ROLE_FLOW:
         role_type = ROLE_FLOW[data]["type"]
         role_data[chat_id] = {"Type": role_type}
         user_state[chat_id] = {"flow_key": data, "step": 0}
         await query.message.reply_text(ROLE_FLOW[data]["questions"][0])
     elif data == "ok":
-        # After final step, show vibe check-in screen
         vibe_text = (
             "<b>Do we have collaba vibe check-in? Yes, we do!</b>\n\n"
             "1. Be real. name things as it is, don’t shame them.\n"
@@ -314,7 +312,6 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     state = user_state.get(chat_id)
     telegram_username = f"@{update.effective_user.username}" if update.effective_user.username else ""
 
-    # Flow for all roles in ROLE_FLOW
     if isinstance(state, dict) and "flow_key" in state:
         flow_key = state["flow_key"]
         step = state["step"]
@@ -334,13 +331,11 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             user_state[chat_id]["step"] += 1
             await update.message.reply_text(questions[step + 1])
         else:
-            # Запись в Notion
             notion_payload = {
                 "Name": {"title": [{"text": {"content": role_data[chat_id].get("Name", "")}}]},
                 "Type": {"rich_text": [{"text": {"content": role_data[chat_id].get("Type", flow["type"])}}]},
                 "Telegram": {"rich_text": [{"text": {"content": role_data[chat_id].get("Telegram", telegram_username)}}]},
             }
-            # Добавляем остальные поля (rich_text)
             for f in fields[1:]:
                 notion_payload[f] = {"rich_text": [{"text": {"content": role_data[chat_id].get(f, "")}}]}
 
