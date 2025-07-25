@@ -100,6 +100,17 @@ ROLE_FLOW = {
         ],
         "fields": ["Name", "Location", "About", "Link", "Idea"]
     },
+    "role_sonok": {  # New Сынок role, identical to SMM but Type is "Сынок"
+        "type": "Сынок",
+        "questions": [
+            "What is your name, dear?",
+            "Your location? We will send you an invitation to the local cllb party when it happens",
+            "What are your specific skills? \n\nPlease add the link to your portfolio\\ cv \\ web site",
+            "Social networks 👀",
+            "Tell a bit about the idea you would like to implement with collaba community? And what do you need to make a dream come true?"
+        ],
+        "fields": ["Name", "Location", "About", "Link", "Idea"]
+    },
     "role_star": {
         "type": "Little Star",
         "questions": [
@@ -199,6 +210,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 [InlineKeyboardButton("manager", callback_data="role_manager")],
                 [InlineKeyboardButton("lawyer", callback_data="role_lawyer")],
                 [InlineKeyboardButton("smm", callback_data="role_smm")],
+                [InlineKeyboardButton("сынок", callback_data="role_sonok")],
                 [InlineKeyboardButton("my mom calls me my little star", callback_data="role_star")],
             ])
         )
@@ -252,7 +264,8 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             "• Friends\n"
             "• Chaos\n"
             "• Creative fuel\n"
-            "• A stage we’re all building together"
+            "• A stage we’re all building together\n\n"
+            "<blockquote>p.s. we may even invite you to join the core team with endless opportunities to do crazy things day and night 😎</blockquote>"
         )
         await query.message.reply_text(what_you_get, parse_mode="HTML", reply_markup=InlineKeyboardMarkup([
             [InlineKeyboardButton("continue", callback_data="ask_dm")]
