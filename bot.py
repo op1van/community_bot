@@ -115,18 +115,9 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
         await query.message.reply_text("What is your name? Add your telegram @ as well")
 
-    # FINAL SUBMIT BUTTON (MEMBER)
-    elif data == "submit_member":
-        user_state[chat_id]["step"] = 999
-
-        await query.message.reply_text(
-            "See you inside! If you have any questions, text Mira [@mikroslava] or Emil – [@colasigna]"
-        )
-
-    # FINAL SUBMIT BUTTON (EXPERT)
+    # FINAL SUBMIT BUTTONS (deleted for member, kept for expert)
     elif data == "submit_expert":
         user_state[chat_id]["step"] = 999
-
         await query.message.reply_text(
             "See you inside! We’ll contact you soon after reviewing your application 🤝"
         )
@@ -224,7 +215,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             )
             return
 
-        # Q8 — Idea → SEND TO GOOGLE SHEETS
+        # Q8 — Idea → SEND TO GOOGLE SHEETS → FINAL SCREEN (NO LAST STEP)
         if step == 10:
             user_data[chat_id]["Idea"] = text
 
@@ -234,7 +225,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             except Exception as e:
                 await update.message.reply_text(f"Error saving to Sheets: {e}")
 
-            user_state[chat_id]["step"] = 11
+            user_state[chat_id]["step"] = 999
 
             keyboard = [
                 [InlineKeyboardButton("Submit", url="https://t.me/+pNM6z-LJj5g3NWZi")]
@@ -242,14 +233,15 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
             await update.message.reply_text(
                 "Ok, we got it! THANK YOU! Here is your invitation link.\n"
-                "Tap it to submit your application.",
+                "Tap it to submit your application.\n\n"
+                "See you inside! If you have any questions, text Mira [@mikroslava] or Emil – [@colasigna]",
                 reply_markup=InlineKeyboardMarkup(keyboard)
             )
             return
 
 
     # ──────────────────────────────────────────────
-    # EXPERT FLOW
+    # EXPERT FLOW (unchanged)
     # ──────────────────────────────────────────────
 
     if flow == "expert":
@@ -331,7 +323,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             )
             return
 
-        # Q8 — Motivation → SEND TO GOOGLE SHEETS
+        # Q8 — Motivation → SEND TO GOOGLE SHEETS → FINAL SCREEN
         if step == 10:
             user_data[chat_id]["Motivation"] = text
 
