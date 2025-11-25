@@ -118,6 +118,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     # FINAL SUBMIT BUTTON (MEMBER)
     elif data == "submit_member":
         user_state[chat_id]["step"] = 999
+
         await query.message.reply_text(
             "See you inside! If you have any questions, text Mira [@mikroslava] or Emil – [@colasigna]"
         )
@@ -125,6 +126,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     # FINAL SUBMIT BUTTON (EXPERT)
     elif data == "submit_expert":
         user_state[chat_id]["step"] = 999
+
         await query.message.reply_text(
             "See you inside! We’ll contact you soon after reviewing your application 🤝"
         )
@@ -234,7 +236,9 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
             user_state[chat_id]["step"] = 11
 
-            keyboard = [[InlineKeyboardButton("Submit", callback_data="submit_member")]]
+            keyboard = [
+                [InlineKeyboardButton("Submit", url="https://t.me/+pNM6z-LJj5g3NWZi")]
+            ]
 
             await update.message.reply_text(
                 "Ok, we got it! THANK YOU! Here is your invitation link.\n"
@@ -339,7 +343,9 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
             user_state[chat_id]["step"] = 11
 
-            keyboard = [[InlineKeyboardButton("Submit", callback_data="submit_expert")]]
+            keyboard = [
+                [InlineKeyboardButton("Submit", url="https://t.me/+pNM6z-LJj5g3NWZi")]
+            ]
 
             await update.message.reply_text(
                 "Ok, we got it! THANK YOU!\n"
