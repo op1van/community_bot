@@ -116,8 +116,8 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             "By submitting this \"form\" you consent to the collection and processing of your personal data "
             "for the purpose of assembling a professional team. Your data may be transferred and stored "
             "outside your country of residence. You can withdraw your consent at any time by letting "
-            "<b>@mIla_I</b> know.\n\n"
-            "<a href='https://drive.google.com/file/u/2/d/1euqwTrqdoG2-9ySB9JivXdTT3Tb_R5sG/view'>"
+            "<b>@mlla_I</b> know.\n\n"
+            "<a href='https://drive.google.com/file/d/15UHIGbDCtzKKQAJMtsfZvpkntU-i3Buu/view?usp=sharing'>"
             "I have read and agree to the Privacy Policy and Cookie Policy 🥸</a>"
         )
 
