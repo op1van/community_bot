@@ -21,8 +21,40 @@ requests.post(
 )
 
 requests.post(
+    f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/setMyDescription",
+    json={
+        "description": NEW_DESCRIPTION,
+        "language_code": "ru"
+    }
+)
+
+requests.post(
+    f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/setMyDescription",
+    json={
+        "description": NEW_DESCRIPTION,
+        "language_code": "en"
+    }
+)
+
+requests.post(
     f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/setMyShortDescription",
     json={"short_description": NEW_DESCRIPTION}
+)
+
+requests.post(
+    f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/setMyShortDescription",
+    json={
+        "short_description": NEW_DESCRIPTION,
+        "language_code": "ru"
+    }
+)
+
+requests.post(
+    f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/setMyShortDescription",
+    json={
+        "short_description": NEW_DESCRIPTION,
+        "language_code": "en"
+    }
 )
 
 if not TELEGRAM_TOKEN:
