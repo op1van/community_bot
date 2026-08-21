@@ -13,6 +13,18 @@ from telegram.ext import (
 TELEGRAM_TOKEN = os.getenv("BOT_TOKEN")
 GOOGLE_WEBHOOK_URL = os.getenv("GOOGLE_WEBHOOK_URL")
 
+NEW_DESCRIPTION = "collaba | community-owned music label"
+
+requests.post(
+    f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/setMyDescription",
+    json={"description": NEW_DESCRIPTION}
+)
+
+requests.post(
+    f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/setMyShortDescription",
+    json={"short_description": NEW_DESCRIPTION}
+)
+
 if not TELEGRAM_TOKEN:
     raise RuntimeError("BOT_TOKEN env var is missing")
 if not GOOGLE_WEBHOOK_URL:
@@ -72,7 +84,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             "By submitting this \"form\" you consent to the collection and processing of your personal data "
             "for the purpose of assembling a professional team. Your data may be transferred and stored "
             "outside your country of residence. You can withdraw your consent at any time by letting "
-            "<b>@MilaIgnatevaa</b> know.\n\n"
+            "<b>@mIla_I</b> know.\n\n"
             "<a href='https://drive.google.com/file/u/2/d/1euqwTrqdoG2-9ySB9JivXdTT3Tb_R5sG/view'>"
             "I have read and agree to the Privacy Policy and Cookie Policy 🥸</a>"
         )
@@ -234,7 +246,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             await update.message.reply_text(
                 "Ok, we got it! THANK YOU! Here is your invitation link.\n"
                 "Tap it to submit your application.\n\n"
-                "See you inside! If you have any questions, text Mira [@mikroslava] or Emil – [@colasigna]",
+                "See you inside! If you have any questions, text Emil – [@colasigna]",
                 reply_markup=InlineKeyboardMarkup(keyboard)
             )
             return
