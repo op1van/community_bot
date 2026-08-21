@@ -1,3 +1,3 @@
-python-telegram-bot>=20.8,<21.0
+python-telegram-bot>=22.8,<23
 notion-client
 requests
