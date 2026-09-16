@@ -278,7 +278,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             await update.message.reply_text(
                 "Ok, we got it! THANK YOU! Here is your invitation link.\n"
                 "Tap it to submit your application.\n\n"
-                "See you inside! If you have any questions, text Emil – [@emilchensky];Liza - [@D0_oQ];German - [@German_M]",
+                "See you inside! If you have any questions, text Emil – [@emilchensky];\n Liza - [@D0_oQ];\n German - [@German_M]",
                 reply_markup=InlineKeyboardMarkup(keyboard)
             )
             return
